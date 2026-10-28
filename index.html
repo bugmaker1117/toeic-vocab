@@ -1,0 +1,2328 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>托业背单词 · TOEIC Vocab</title>
+<!-- 发版只需改下面这行的 content，页面里所有版本号与更新检测都读它 -->
+<meta name="app-version" content="1.2.0">
+<meta name="app-name" content="托业背单词">
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#f3f6fb; --bg2:#eaeffa; --panel:#ffffff; --panel2:#fafbfe;
+  --text:#161c2d; --muted:#6b7794; --line:#e5eaf3;
+  --accent:#4a63f0; --accent2:#7c5cf5; --accent-soft:#edf0ff;
+  --teal:#0eb5a6; --ok:#11a05e; --ok-soft:#e8f8ef;
+  --warn:#d98600; --warn-soft:#fff6e3;
+  --mn:#a9660a; --mn-soft:#fff8ea; --mn-line:#f4e2bf;
+  --bad:#e0455e; --bad-soft:#fdeced;
+  --shadow:0 8px 30px rgba(22,35,68,.07);
+  --shadow-sm:0 2px 8px rgba(22,35,68,.05);
+  --r:16px;
+}
+[data-theme="dark"]{
+  --bg:#0d121b; --bg2:#151c28; --panel:#161e2b; --panel2:#1b2433;
+  --text:#e9eefb; --muted:#93a1bd; --line:#28323f;
+  --accent:#7288ff; --accent2:#9a7cff; --accent-soft:#1e2740;
+  --teal:#2fd0c0; --ok:#35cc85; --ok-soft:#12291f;
+  --warn:#f0b23c; --warn-soft:#2a2314;
+  --mn:#f0c069; --mn-soft:#241f14; --mn-line:#3b3220;
+  --bad:#ff6b81; --bad-soft:#2c171c;
+  --shadow:0 10px 34px rgba(0,0,0,.4);
+  --shadow-sm:0 2px 10px rgba(0,0,0,.3);
+}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:"Segoe UI",system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.6;
+}
+h1,h2,h3,h4{margin:0;font-weight:650;letter-spacing:-.2px}
+p{margin:0}
+button{font-family:inherit}
+input,select,textarea{font-family:inherit;font-size:14px;color:var(--text)}
+::selection{background:rgba(74,99,240,.2)}
+
+.app{display:flex;min-height:100vh}
+
+/* ---------- sidebar ---------- */
+.sidebar{
+  width:238px;flex:0 0 238px;background:var(--panel);border-right:1px solid var(--line);
+  padding:22px 14px;display:flex;flex-direction:column;gap:8px;position:sticky;top:0;height:100vh;
+}
+.brand{display:flex;gap:11px;align-items:center;padding:2px 8px 18px}
+.logo{
+  width:40px;height:40px;border-radius:12px;flex:0 0 40px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;display:grid;place-items:center;font-weight:700;font-size:18px;
+  box-shadow:0 6px 16px rgba(74,99,240,.32);
+}
+.bname{font-weight:650;font-size:15px;letter-spacing:-.2px}
+.bsub{font-size:10px;color:var(--muted);letter-spacing:1.4px;font-weight:600}
+#nav{display:flex;flex-direction:column;gap:3px}
+.nav-item{
+  display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;border:0;
+  background:transparent;color:var(--muted);font-size:14px;cursor:pointer;text-align:left;
+  transition:background .15s,color .15s;width:100%;
+}
+.nav-item:hover{background:var(--bg2);color:var(--text)}
+.nav-item.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.nav-item svg{width:18px;height:18px;flex:0 0 18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.side-foot{margin-top:auto;padding:14px 10px 4px;border-top:1px solid var(--line)}
+.streak{font-size:13px;color:var(--muted)}
+.streak b{color:var(--accent);font-size:17px;margin-right:2px}
+.side-note{font-size:11px;color:var(--muted);opacity:.75;margin-top:4px}
+
+/* ---------- main ---------- */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 34px;position:sticky;top:0;background:var(--bg);z-index:20;
+}
+.tb-title{font-size:19px;font-weight:650;letter-spacing:-.3px}
+.tb-right{display:flex;gap:8px;align-items:center}
+.icon-btn{
+  width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--panel);
+  color:var(--muted);display:grid;place-items:center;cursor:pointer;transition:.15s;
+}
+.icon-btn:hover{color:var(--accent);border-color:var(--accent)}
+.icon-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.view{padding:2px 34px 70px;max-width:940px;width:100%}
+.view[hidden]{display:none}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-sm)}
+.card.pad{padding:22px 24px;margin-bottom:16px}
+.card.pad.tight{padding:16px 18px}
+.card h3{font-size:15px;margin-bottom:12px}
+.muted{color:var(--muted);font-size:13px}
+
+/* ---------- hero ---------- */
+.hero{
+  position:relative;overflow:hidden;border-radius:20px;padding:26px 28px;margin-bottom:16px;
+  background:linear-gradient(130deg,#4a63f0 0%,#6a5cf2 48%,#8b5cf6 100%);
+  color:#fff;display:flex;align-items:center;justify-content:space-between;gap:24px;
+  box-shadow:0 14px 40px rgba(74,99,240,.28);
+}
+.hero::after{
+  content:"";position:absolute;right:-60px;top:-90px;width:280px;height:280px;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.28),transparent 62%);
+}
+.hero-kicker{font-size:11px;letter-spacing:2px;font-weight:700;opacity:.78;margin-bottom:6px}
+.hero h1{font-size:25px;letter-spacing:-.5px;margin-bottom:8px}
+.hero-sub{font-size:13.5px;opacity:.9;margin-bottom:18px}
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap}
+.hero .btn.primary{background:#fff;color:#3b4fd8;box-shadow:0 6px 18px rgba(20,20,60,.18)}
+.hero .btn.primary:hover{background:#f4f6ff}
+.hero .btn.ghost{background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.34)}
+.hero .btn.ghost:hover{background:rgba(255,255,255,.26)}
+.hero-ring{position:relative;flex:0 0 132px;width:132px;height:132px;z-index:1}
+.hero-ring svg{transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:rgba(255,255,255,.24);stroke-width:8}
+.ring-fg{fill:none;stroke:#fff;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .6s cubic-bezier(.4,0,.2,1)}
+.ring-label{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring-label b{font-size:26px;font-weight:700;line-height:1.1}
+.ring-label span{font-size:11px;opacity:.82;letter-spacing:.5px}
+
+/* ---------- tiles ---------- */
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 16px;box-shadow:var(--shadow-sm)}
+.tile .k{font-size:11.5px;color:var(--muted);letter-spacing:.4px;margin-bottom:6px}
+.tile .v{font-size:23px;font-weight:680;letter-spacing:-.6px;line-height:1.2}
+.tile .v small{font-size:12px;font-weight:500;color:var(--muted);margin-left:3px}
+
+/* ---------- segmented ---------- */
+.seg{display:inline-flex;background:var(--bg2);border-radius:10px;padding:3px;gap:2px}
+.seg button{
+  border:0;background:transparent;color:var(--muted);font-size:12.5px;padding:6px 13px;border-radius:8px;
+  cursor:pointer;transition:.15s;font-weight:500;
+}
+.seg button.on{background:var(--panel);color:var(--accent);font-weight:600;box-shadow:var(--shadow-sm)}
+
+/* ---------- chart ---------- */
+.chart{display:flex;align-items:flex-end;gap:10px;height:120px;margin-top:6px}
+.chart .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;height:100%;justify-content:flex-end}
+.chart .bar{
+  width:100%;max-width:38px;border-radius:7px 7px 4px 4px;min-height:3px;
+  background:linear-gradient(180deg,var(--accent),#8b8cf7);opacity:.92;transition:height .5s cubic-bezier(.4,0,.2,1);
+}
+.chart .bar.empty{background:var(--bg2);opacity:1}
+.chart .lb{font-size:11px;color:var(--muted)}
+.chart .col.today .lb{color:var(--accent);font-weight:700}
+
+/* ---------- study ---------- */
+#studyBody{max-width:640px}
+.study-top{display:flex;align-items:center;gap:14px;margin:4px 0 20px}
+.pbar{flex:1;height:6px;background:var(--bg2);border-radius:99px;overflow:hidden}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .35s ease}
+.ptxt{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ptxt b{color:var(--text)}
+
+.fc{
+  position:relative;background:var(--panel);border:1px solid var(--line);border-radius:20px;
+  min-height:330px;padding:26px 28px 22px;display:flex;flex-direction:column;cursor:pointer;
+  box-shadow:var(--shadow);transition:border-color .2s;
+}
+.fc:hover{border-color:#cfd8ee}
+.fc-tag{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.pill{font-size:11px;padding:3px 9px;border-radius:99px;font-weight:600;letter-spacing:.2px}
+.pill.new{background:var(--accent-soft);color:var(--accent)}
+.pill.rev{background:var(--bg2);color:var(--muted)}
+.pill.cat{background:var(--bg2);color:var(--muted);font-weight:500}
+.star{
+  margin-left:auto;border:0;background:transparent;cursor:pointer;padding:4px;border-radius:8px;
+  color:var(--line);display:grid;place-items:center;transition:.15s;
+}
+.star:hover{background:var(--warn-soft);color:var(--warn)}
+.star.on{color:var(--warn)}
+.star svg{width:19px;height:19px;stroke:currentColor;fill:transparent;stroke-width:1.8;stroke-linejoin:round}
+.star.on svg{fill:currentColor}
+
+.fc-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px 0}
+.fc-word{font-size:44px;font-weight:680;letter-spacing:-1px;line-height:1.15;text-align:center;word-break:break-word}
+.fc-ph{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:15px}
+.ic{
+  border:1px solid var(--line);background:var(--panel2);color:var(--muted);border-radius:99px;
+  width:30px;height:30px;display:grid;place-items:center;cursor:pointer;transition:.15s;
+}
+.ic:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.ic svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.fc-back{display:none;border-top:1px dashed var(--line);padding-top:16px;margin-top:6px}
+.fc.flipped .fc-back{display:block;animation:fadeUp .28s ease}
+.fc.flipped .fc-hint{display:none}
+.fc-mean{font-size:17px;font-weight:600;margin-bottom:10px;line-height:1.55}
+.fc-ex p{font-size:14px;line-height:1.65;color:var(--text);margin-bottom:2px}
+.fc-ex .exzh{font-size:13px;color:var(--muted)}
+.fc-mn{
+  margin-top:13px;padding:10px 13px;border-radius:11px;background:var(--mn-soft);
+  border:1px solid var(--mn-line);font-size:13px;line-height:1.65;color:var(--text);
+}
+.mn-tag{
+  display:inline-block;font-size:10px;font-weight:700;letter-spacing:.8px;color:var(--mn);
+  border:1px solid var(--mn-line);background:var(--panel);border-radius:5px;padding:1px 6px;margin-right:7px;
+  vertical-align:1px;
+}
+.fb .fc-mn{margin-top:10px;font-size:12.5px}
+.fc-hint{text-align:center;font-size:12.5px;color:var(--muted);padding-top:12px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+kbd{
+  display:inline-block;padding:1px 6px;border-radius:5px;border:1px solid var(--line);
+  border-bottom-width:2px;background:var(--panel2);font-size:11px;font-family:inherit;color:var(--muted);
+}
+.grades{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.g{
+  border-radius:13px;border:1px solid var(--line);background:var(--panel);padding:13px 8px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:5px;font-size:14px;font-weight:600;
+  color:var(--text);transition:.15s;
+}
+.g kbd{font-size:10px;opacity:.8}
+.g:hover{transform:translateY(-1px)}
+.g0:hover{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.g1:hover{border-color:var(--warn);background:var(--warn-soft);color:var(--warn)}
+.g2:hover{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}
+
+/* 前后翻页 */
+.studynav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
+.navbtn{
+  display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:11px;
+  border:1px solid var(--line);background:var(--panel);color:var(--text);
+  font-size:13.5px;font-weight:550;cursor:pointer;transition:.15s;box-shadow:var(--shadow-sm);
+}
+.navbtn:hover:not(:disabled){border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.navbtn:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+.navpos{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;letter-spacing:.3px}
+.revline{
+  display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13px;
+  color:var(--muted);flex-wrap:wrap;
+}
+.pill.okp{background:var(--ok-soft);color:var(--ok)}
+.pill.warnp{background:var(--warn-soft);color:var(--warn)}
+.pill.badp{background:var(--bad-soft);color:var(--bad)}
+.pill.rev2{background:var(--bg2);color:var(--muted);border:1px dashed var(--line)}
+.fc.rev-card{cursor:default}
+.fc.rev-card:hover{border-color:var(--line)}
+
+/* choice / spell */
+.q-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:26px 28px;box-shadow:var(--shadow)}
+.q-tag{font-size:12px;color:var(--muted);letter-spacing:.4px;margin-bottom:14px;font-weight:500}
+.q-word{font-size:36px;font-weight:680;letter-spacing:-.8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.q-ph{color:var(--muted);font-size:14px;margin-top:4px}
+.q-mean{font-size:22px;font-weight:620;line-height:1.5;margin-bottom:4px}
+.opts{display:grid;gap:9px;margin-top:20px}
+.opt{
+  display:flex;align-items:center;gap:11px;text-align:left;padding:13px 15px;border-radius:12px;
+  border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:14.5px;cursor:pointer;
+  transition:.14s;line-height:1.45;
+}
+.opt:hover:not(:disabled){border-color:var(--accent);background:var(--accent-soft)}
+.opt:disabled{cursor:default}
+.ol{
+  width:22px;height:22px;flex:0 0 22px;border-radius:7px;background:var(--panel);border:1px solid var(--line);
+  display:grid;place-items:center;font-size:11.5px;font-weight:700;color:var(--muted);
+}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.right .ol{background:var(--ok);border-color:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt.wrong .ol{background:var(--bad);border-color:var(--bad);color:#fff}
+
+.fb{margin-top:16px;padding:14px 16px;border-radius:12px;font-size:14px;animation:fadeUp .25s ease}
+.fb.ok{background:var(--ok-soft);border:1px solid rgba(17,160,94,.25)}
+.fb.no{background:var(--bad-soft);border:1px solid rgba(224,69,94,.22)}
+.fb-h{font-weight:650;margin-bottom:4px}
+.fb.ok .fb-h{color:var(--ok)}
+.fb.no .fb-h{color:var(--bad)}
+.fb p{font-size:13.5px;color:var(--text);line-height:1.6}
+.fb .zh{color:var(--muted);font-size:12.5px}
+.fb-actions{margin-top:12px;display:flex;gap:8px}
+
+.spell-row{display:flex;gap:9px;margin-top:18px}
+.spell-in{
+  flex:1;padding:13px 15px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);
+  font-size:17px;letter-spacing:.5px;outline:none;transition:.15s;
+}
+.spell-in:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.spell-in.right{border-color:var(--ok)}
+.spell-in.wrong{border-color:var(--bad)}
+.spell-hint{margin-top:11px;font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.link{border:0;background:transparent;color:var(--accent);cursor:pointer;font-size:12.5px;padding:0;text-decoration:underline;text-underline-offset:2px}
+
+/* buttons */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:10px 18px;border-radius:11px;border:1px solid var(--line);background:var(--panel);
+  color:var(--text);font-size:14px;font-weight:550;cursor:pointer;transition:.15s;
+}
+.btn:hover{border-color:#c9d3ea}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 6px 16px rgba(74,99,240,.25)}
+.btn.primary:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.btn.ghost{background:transparent}
+.btn.ghost:hover{background:var(--bg2)}
+.btn.danger{color:var(--bad);border-color:rgba(224,69,94,.35)}
+.btn.danger:hover{background:var(--bad-soft)}
+.btn.sm{padding:7px 13px;font-size:13px;border-radius:9px}
+.row{display:flex;align-items:center;gap:10px}
+.row.gap{gap:10px;flex-wrap:wrap}
+.row.between{justify-content:space-between}
+
+/* summary */
+.done-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:34px 28px;text-align:center;box-shadow:var(--shadow)}
+.done-ic{
+  width:60px;height:60px;border-radius:20px;margin:0 auto 16px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--ok),#3ad29a);color:#fff;box-shadow:0 10px 26px rgba(17,160,94,.3);
+}
+.done-ic svg{width:28px;height:28px;stroke:#fff;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.done-card h2{font-size:21px;margin-bottom:6px}
+.done-sub{color:var(--muted);font-size:13.5px;margin-bottom:20px}
+.done-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px}
+.done-grid div{background:var(--panel2);border-radius:12px;padding:12px 6px}
+.done-grid b{display:block;font-size:20px;font-weight:680;letter-spacing:-.5px}
+.done-grid span{font-size:11.5px;color:var(--muted)}
+
+/* word list */
+.searchbar{display:flex;gap:9px;margin-bottom:12px}
+.searchbar input{
+  flex:1;padding:10px 14px;border-radius:11px;border:1px solid var(--line);background:var(--panel2);outline:none;transition:.15s;
+}
+.searchbar input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.searchbar select{padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:var(--panel2);outline:none;max-width:170px}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{
+  border:1px solid var(--line);background:transparent;color:var(--muted);font-size:12.5px;
+  padding:6px 13px;border-radius:99px;cursor:pointer;transition:.15s;font-weight:500;
+}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.wrow{
+  display:flex;align-items:center;gap:14px;padding:11px 4px;border-bottom:1px solid var(--line);cursor:pointer;
+}
+.wrow:last-child{border-bottom:0}
+.wrow:hover{background:var(--panel2)}
+.wrow .w{font-weight:600;font-size:14.5px;min-width:132px;display:flex;align-items:center;gap:6px}
+.wrow .m{flex:1;color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wrow .st{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg2);color:var(--muted);white-space:nowrap}
+.wrow .st.s1{background:var(--warn-soft);color:var(--warn)}
+.wrow .st.s2{background:var(--ok-soft);color:var(--ok)}
+.wrow .wstar{color:var(--warn);font-size:12px}
+.empty-tip{text-align:center;color:var(--muted);font-size:13px;padding:34px 0}
+
+/* stats */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.heat{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px}
+.heat i{aspect-ratio:1;border-radius:5px;background:var(--bg2);display:block}
+.heat i.l1{background:rgba(74,99,240,.28)}
+.heat i.l2{background:rgba(74,99,240,.5)}
+.heat i.l3{background:rgba(74,99,240,.72)}
+.heat i.l4{background:var(--accent)}
+.barline{margin-top:10px}
+.barline .bl{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:5px}
+.barline .bt{height:7px;background:var(--bg2);border-radius:99px;overflow:hidden}
+.barline .bt i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+
+/* settings */
+.field{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:13px 0;border-bottom:1px solid var(--line)}
+.field:last-child{border-bottom:0}
+.field > label{font-size:14px;color:var(--text)}
+.field .hint{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.field select{padding:8px 11px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);outline:none;min-width:140px}
+.field input[type=range]{width:180px;accent-color:var(--accent)}
+.val{display:inline-block;min-width:30px;text-align:right;font-weight:600;font-size:14px;margin-left:8px}
+.switch{position:relative;width:44px;height:25px;flex:0 0 44px}
+.switch input{opacity:0;width:0;height:0;position:absolute}
+.switch i{
+  position:absolute;inset:0;background:var(--bg2);border:1px solid var(--line);border-radius:99px;transition:.2s;cursor:pointer;
+}
+.switch i::after{
+  content:"";position:absolute;width:19px;height:19px;border-radius:50%;background:#fff;left:2px;top:2px;
+  transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.2);
+}
+.switch input:checked + i{background:var(--accent);border-color:var(--accent)}
+.switch input:checked + i::after{transform:translateX(19px)}
+textarea#importBox{
+  width:100%;min-height:110px;margin:10px 0 12px;padding:12px 14px;border-radius:11px;border:1px solid var(--line);
+  background:var(--panel2);resize:vertical;outline:none;line-height:1.7;font-size:13px;
+}
+textarea#importBox:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.kbdlist{list-style:none;padding:0;margin:0;font-size:13.5px;color:var(--muted)}
+.kbdlist li{display:flex;align-items:center;gap:10px;padding:7px 0}
+.kbdlist b{color:var(--text);font-weight:600;min-width:56px}
+.danger-zone .btn{margin-top:4px}
+
+/* 更新提示条 */
+.upd{
+  display:flex;align-items:center;gap:12px;margin:0 34px 14px;padding:11px 16px;
+  border-radius:13px;background:var(--accent-soft);border:1px solid rgba(74,99,240,.28);
+  font-size:13.5px;color:var(--text);animation:fadeUp .3s ease;
+}
+.upd[hidden]{display:none}
+.upd .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:0 0 7px}
+.upd b{color:var(--accent)}
+.upd .spacer{flex:1}
+.upd .x{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;border-radius:6px}
+.upd .x:hover{background:var(--panel);color:var(--text)}
+.verline{font-size:11px;color:var(--muted);opacity:.85;margin-top:3px;font-variant-numeric:tabular-nums}
+
+/* toast */.toast{
+  position:fixed;left:50%;bottom:36px;transform:translate(-50%,20px);opacity:0;pointer-events:none;
+  background:#1d2434;color:#fff;padding:11px 20px;border-radius:12px;font-size:13.5px;z-index:99;
+  transition:.25s;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:80vw;text-align:center;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+[data-theme="dark"] .toast{background:#2a3550}
+
+@media (max-width:900px){
+  .tiles{grid-template-columns:repeat(2,1fr)}
+  .view{padding:2px 18px 80px}
+  .topbar{padding:14px 18px}
+}
+@media (max-width:720px){
+  .app{flex-direction:column-reverse}
+  .sidebar{
+    width:100%;flex:none;height:auto;position:fixed;bottom:0;left:0;right:0;top:auto;
+    flex-direction:row;border-right:0;border-top:1px solid var(--line);padding:8px;z-index:30;gap:2px;
+  }
+  .brand,.side-foot{display:none}
+  #nav{flex-direction:row;flex:1;justify-content:space-around}
+  .nav-item{flex-direction:column;gap:3px;font-size:10.5px;padding:6px 2px;align-items:center;justify-content:center}
+  .nav-item svg{width:20px;height:20px}
+  .hero{flex-direction:column;align-items:flex-start;padding:22px}
+  .hero-ring{position:absolute;right:18px;top:18px;width:92px;height:92px;flex:none}
+  .ring-label b{font-size:19px}
+  .ring-label span{font-size:9px}
+  .done-grid{grid-template-columns:repeat(2,1fr)}
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+  .fc-word{font-size:34px}
+  .wrow .w{min-width:96px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">T</div>
+      <div>
+        <div class="bname">托业背单词</div>
+        <div class="bsub">TOEIC VOCAB</div>
+      </div>
+    </div>
+    <nav id="nav">
+      <button class="nav-item active" data-view="home">
+        <svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6H9.5v6H5a1 1 0 0 1-1-1z"/></svg>
+        今日学习
+      </button>
+      <button class="nav-item" data-view="study">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.4 16 12l-6 3.6z"/></svg>
+        开始背词
+      </button>
+      <button class="nav-item" data-view="words">
+        <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5A2.5 2.5 0 0 1 4 20.5z"/></svg>
+        词库
+      </button>
+      <button class="nav-item" data-view="stats">
+        <svg viewBox="0 0 24 24"><path d="M5 20V11M11 20V4M17 20v-6"/><path d="M3 20h18"/></svg>
+        学习统计
+      </button>
+      <button class="nav-item" data-view="settings">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-2.87 1.2V21a2 2 0 1 1-4 0v-.11A1.7 1.7 0 0 0 7.2 19.7l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 3 15H3a2 2 0 1 1 0-4h.11A1.7 1.7 0 0 0 4.4 9.2l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6V4a2 2 0 1 1 4 0v.11a1.7 1.7 0 0 0 2.87 1.2l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 11H21a2 2 0 1 1 0 4z"/></svg>
+        设置
+      </button>
+    </nav>
+    <div class="side-foot">
+      <div class="streak"><b id="sideStreak">0</b> 天连续打卡</div>
+      <div class="side-note">进度保存在本机浏览器</div>
+      <div class="verline" id="sideVer">v1.2.0</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="tb-title" id="tbTitle">今日学习</div>
+      <div class="tb-right">
+        <button class="icon-btn" id="btnTheme" title="切换深浅色">
+          <svg viewBox="0 0 24 24"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="upd" id="updBar" hidden>
+      <span class="dot"></span>
+      <span>发现新版本 <b id="updVer"></b>（你当前 <span id="updCur"></span>）</span>
+      <span class="spacer"></span>
+      <button class="btn sm primary" id="btnReload">立即刷新</button>
+      <button class="x" id="btnUpdClose" title="本次忽略">×</button>
+    </div>
+
+    <section class="view" id="view-home"></section>
+    <section class="view" id="view-study" hidden><div id="studyBody"></div></section>
+
+    <section class="view" id="view-words" hidden>
+      <div class="card pad tight">
+        <div class="searchbar">
+          <input id="wordSearch" placeholder="搜索单词或中文释义…" autocomplete="off">
+          <select id="wordCat"></select>
+        </div>
+        <div class="chips" id="wordChips">
+          <button class="chip active" data-f="all">全部</button>
+          <button class="chip" data-f="new">未学</button>
+          <button class="chip" data-f="learning">学习中</button>
+          <button class="chip" data-f="mastered">已掌握</button>
+          <button class="chip" data-f="star">收藏</button>
+          <button class="chip" data-f="bad">易错</button>
+        </div>
+      </div>
+      <div class="card pad"><div id="wordList"></div></div>
+    </section>
+
+    <section class="view" id="view-stats" hidden></section>
+
+    <section class="view" id="view-settings" hidden>
+      <div class="card pad">
+        <h3>学习设置</h3>
+        <div class="field">
+          <div><label>每日新词数量</label><span class="hint">达到数量后当天不再安排新词</span></div>
+          <div class="row"><input type="range" id="setDaily" min="5" max="60" step="5"><span class="val" id="setDailyVal">20</span></div>
+        </div>
+        <div class="field">
+          <div><label>学习模式</label><span class="hint">复习词会按此模式出题，新词始终用卡片记忆</span></div>
+          <select id="setMode">
+            <option value="mix">混合（推荐）</option>
+            <option value="card">只看卡片</option>
+            <option value="choice">四选一</option>
+            <option value="spell">拼写听写</option>
+          </select>
+        </div>
+        <div class="field">
+          <div><label>发音口音</label><span class="hint">使用系统语音朗读</span></div>
+          <select id="setAccent">
+            <option value="en-US">美式 en-US</option>
+            <option value="en-GB">英式 en-GB</option>
+          </select>
+        </div>
+        <div class="field">
+          <div><label>自动朗读单词</label><span class="hint">卡片出现时自动读一遍</span></div>
+          <label class="switch"><input type="checkbox" id="setAuto"><i></i></label>
+        </div>
+        <div class="field">
+          <div><label>显示助记</label><span class="hint">翻面后显示词根拆解 / 谐音联想，帮助建立第一印象</span></div>
+          <label class="switch"><input type="checkbox" id="setMn"><i></i></label>
+        </div>
+        <div class="field">
+          <div><label>主题</label></div>
+          <select id="setTheme">
+            <option value="light">浅色</option>
+            <option value="dark">深色</option>
+          </select>
+        </div>
+        <div class="field">
+          <div><label>试听发音</label></div>
+          <button class="btn sm" id="btnTestSpeak">朗读 specimen</button>
+        </div>
+      </div>
+
+      <div class="card pad">
+        <h3>词库管理</h3>
+        <p class="muted">当前共 <b id="bankCount">0</b> 个单词（内置托业高频词 + 你导入的词）。支持导入你在手机墨墨里导出的词表：每行一个词，第 6 栏可以自己填助记。</p>
+        <textarea id="importBox" placeholder="支持三种格式，每行一条：&#10;abandon|/əˈbændən/|v. 放弃|They abandoned the plan.|他们放弃了计划。|a+band(带)+on → 不再带着 → 放弃&#10;abandon v. 放弃&#10;abandon,放弃"></textarea>
+        <div class="row gap">
+          <button class="btn primary" id="btnImport">导入词库</button>
+          <button class="btn ghost" id="btnExport">导出进度备份</button>
+          <button class="btn ghost" id="btnExportWords">导出全部词表</button>
+        </div>
+      </div>
+
+      <div class="card pad">
+        <h3>快捷键</h3>
+        <ul class="kbdlist">
+          <li><b>空格</b> 显示释义 / 翻转卡片</li>
+          <li><b>1 / 2 / 3</b> 不认识 / 模糊 / 认识</li>
+          <li><b>← / →</b> 回看上一个 / 往回翻</li>
+          <li><b>Enter</b> 拼写题提交答案</li>
+          <li><b>S</b> 朗读当前单词</li>
+        </ul>
+      </div>
+
+      <div class="card pad">
+        <h3>版本与更新</h3>
+        <div class="field">
+          <div>
+            <label>当前版本 <span id="setVer" style="color:var(--accent);font-weight:600">v1.2.0</span></label>
+            <span class="hint" id="updHint">打开页面时会自动检查一次更新</span>
+          </div>
+          <button class="btn sm" id="btnCheckUpdate">检查更新</button>
+        </div>
+        <p class="muted" style="margin-top:10px;line-height:1.8">
+          把这个页面的链接发给朋友，他们打开的就是最新版本；你更新后重新发布一次，链接不变，对方刷新页面即可拿到新版。<br>
+          学习进度存在各自浏览器里，互不影响，也不会因为版本更新而丢失。
+        </p>
+      </div>
+
+      <div class="card pad danger-zone">
+        <h3>危险操作</h3>
+        <p class="muted" style="margin-bottom:10px">清空后所有学习进度、复习安排和打卡记录都会被删除，词库保留。</p>
+        <button class="btn danger" id="btnReset">清空学习进度</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= 词库：托业高频词（按场景分类） ================= */
+const RAW = `
+##会议沟通
+agenda|/əˈdʒendə/|n. 议程|The agenda for the meeting has been sent to all staff.|会议议程已发送给全体员工。
+postpone|/poʊstˈpoʊn/|v. 推迟，延期|We had to postpone the conference until next month.|我们不得不把会议推迟到下个月。
+convene|/kənˈviːn/|v. 召集，召开|The board will convene at nine tomorrow morning.|董事会将于明早九点召开。
+adjourn|/əˈdʒɜːrn/|v. 休会，延期|The meeting was adjourned until Friday.|会议休会至周五。
+minutes|/ˈmɪnɪts/|n. 会议记录|Please take the minutes during the discussion.|请在讨论期间做会议记录。
+attendee|/əˌtenˈdiː/|n. 出席者|All attendees must register at the front desk.|所有出席者须在前台登记。
+consensus|/kənˈsensəs/|n. 共识，一致意见|The team reached a consensus on the new design.|团队就新设计达成了共识。
+proposal|/prəˈpoʊzl/|n. 提案，建议|The manager approved our proposal for the project.|经理批准了我们的项目提案。
+negotiate|/nɪˈɡoʊʃieɪt/|v. 谈判，协商|We are negotiating a better price with the supplier.|我们正在与供应商协商更好的价格。
+objective|/əbˈdʒektɪv/|n. 目标 adj. 客观的|Our main objective is to raise sales by 20 percent.|我们的主要目标是把销售额提高20%。
+clarify|/ˈklærəfaɪ/|v. 澄清，阐明|Could you clarify the second point of your plan?|你能阐明一下方案的第二点吗？
+summarize|/ˈsʌməraɪz/|v. 总结，概括|She summarized the report in three minutes.|她用三分钟总结了这份报告。
+brief|/briːf/|adj. 简短的 v. 简要介绍|The director gave a brief update on the merger.|总监简要介绍了并购的最新情况。
+deadline|/ˈdedlaɪn/|n. 截止日期|The deadline for submissions is March 15.|提交截止日期是3月15日。
+participate|/pɑːrˈtɪsɪpeɪt/|v. 参加，参与|All department heads will participate in the survey.|所有部门主管都将参与此次调查。
+announce|/əˈnaʊns/|v. 宣布，公布|The company announced its quarterly results today.|公司今天公布了季度业绩。
+confirm|/kənˈfɜːrm/|v. 确认|Please confirm your attendance by Friday.|请在周五前确认是否出席。
+reschedule|/ˌriːˈskedʒuːl/|v. 重新安排|The meeting has been rescheduled to three o'clock.|会议已重新安排到三点。
+follow-up|/ˈfɑːloʊ ʌp/|n. 后续跟进|We will send a follow-up email after the interview.|面试后我们会发送一封跟进邮件。
+handout|/ˈhændaʊt/|n. 讲义，散发材料|Please distribute the handouts before the presentation.|请在演示前分发讲义。
+##办公室行政
+stationery|/ˈsteɪʃəneri/|n. 文具|The office manager ordered new stationery supplies.|办公室经理订购了新的文具用品。
+photocopy|/ˈfoʊtoʊkɑːpi/|v./n. 复印（件）|Could you photocopy these documents for me?|你能帮我复印一下这些文件吗？
+envelope|/ˈenvəloʊp/|n. 信封|Place the invoice in a sealed envelope.|把发票装进密封的信封里。
+appointment|/əˈpɔɪntmənt/|n. 预约，约会|I have an appointment with the dentist at four.|我四点约了牙医。
+receptionist|/rɪˈsepʃənɪst/|n. 接待员|The receptionist will direct you to the conference room.|接待员会带你去会议室。
+cubicle|/ˈkjuːbɪkl/|n. 办公隔间|Her cubicle is next to the window.|她的办公隔间在窗边。
+memorandum|/ˌmeməˈrændəm/|n. 备忘录，内部通知|A memorandum about the new policy was circulated.|一份关于新政策的备忘录已传阅。
+archive|/ˈɑːrkaɪv/|v. 归档 n. 档案|We archive old contracts in the basement.|我们把旧合同归档在地下室。
+supervisor|/ˈsuːpərvaɪzər/|n. 主管，上司|Ask your supervisor before leaving early.|提前离开前先问一下你的主管。
+colleague|/ˈkɑːliːɡ/|n. 同事|I discussed the issue with a colleague.|我和同事讨论了这个问题。
+procedure|/prəˈsiːdʒər/|n. 程序，流程|Follow the standard procedure for refunds.|退款请遵循标准流程。
+maintenance|/ˈmeɪntənəns/|n. 维护，保养|The elevator is out of service for maintenance.|电梯因维护暂停使用。
+renovation|/ˌrenəˈveɪʃn/|n. 翻新，装修|The lobby is closed during the renovation.|大堂在装修期间关闭。
+equipment|/ɪˈkwɪpmənt/|n. 设备，器材|All equipment must be inspected monthly.|所有设备必须每月检查。
+supplies|/səˈplaɪz/|n. 用品，补给|We are running low on office supplies.|我们的办公用品快用完了。
+overtime|/ˈoʊvərtaɪm/|n. 加班|She worked overtime to finish the report.|她加班完成了报告。
+schedule|/ˈskedʒuːl/|v. 安排 n. 日程|The interview is scheduled for Monday morning.|面试安排在周一上午。
+bulletin|/ˈbʊlətɪn/|n. 公告，简报|The notice was posted on the bulletin board.|通知贴在了公告板上。
+filing|/ˈfaɪlɪŋ/|n. 归档，文件整理|Accurate filing saves time later.|准确的归档能为以后节省时间。
+errand|/ˈerənd/|n. 差事，跑腿|He ran an errand to the post office.|他去邮局办了件差事。
+##财务金融
+invoice|/ˈɪnvɔɪs/|n. 发票 v. 开票|Please send the invoice to our accounting department.|请把发票发给我们的财务部门。
+receipt|/rɪˈsiːt/|n. 收据|Keep the receipt in case you need a refund.|保留收据，以防需要退款。
+revenue|/ˈrevənuː/|n. 收入，营收|Annual revenue grew by twelve percent.|年收入增长了12%。
+expense|/ɪkˈspens/|n. 费用，支出|Travel expenses will be reimbursed next week.|差旅费用将于下周报销。
+budget|/ˈbʌdʒɪt/|n. 预算|We must stay within the marketing budget.|我们必须控制在营销预算之内。
+audit|/ˈɔːdɪt/|n./v. 审计|The annual audit begins next Monday.|年度审计下周一开始。
+asset|/ˈæset/|n. 资产|The building is the company's largest asset.|这栋楼是公司最大的资产。
+liability|/ˌlaɪəˈbɪləti/|n. 负债，责任|The balance sheet lists all liabilities.|资产负债表列出了所有负债。
+profit|/ˈprɑːfɪt/|n. 利润|The company reported a profit for the third quarter.|公司公布了第三季度的利润。
+reimburse|/ˌriːɪmˈbɜːrs/|v. 报销，补偿|The firm will reimburse you for the taxi fare.|公司会为你报销出租车费。
+accountant|/əˈkaʊntənt/|n. 会计|Our accountant prepares the tax documents.|我们的会计准备税务文件。
+transaction|/trænˈzækʃn/|n. 交易|Each transaction is recorded automatically.|每笔交易都会被自动记录。
+currency|/ˈkɜːrənsi/|n. 货币|The report shows figures in local currency.|报告以当地货币列示数据。
+installment|/ɪnˈstɔːlmənt/|n. 分期付款|You can pay in six monthly installments.|你可以分六个月付款。
+deposit|/dɪˈpɑːzɪt/|n. 押金，存款 v. 存入|A deposit of 20 percent is required.|需要支付20%的押金。
+withdraw|/wɪðˈdrɔː/|v. 取出，撤回|You can withdraw cash at any branch.|你可以在任何分行取现。
+fiscal|/ˈfɪskl/|adj. 财政的，会计的|The fiscal year ends in March.|财政年度在三月结束。
+subsidy|/ˈsʌbsədi/|n. 补贴，补助|The government offers a subsidy for training.|政府对培训提供补贴。
+allocate|/ˈæləkeɪt/|v. 分配，拨出|The budget was allocated to three departments.|预算被分配给三个部门。
+estimate|/ˈestɪmeɪt/|v. 估计 n. 估算|We estimate the cost at two million dollars.|我们估计成本为两百万美元。
+quarter|/ˈkwɔːrtər/|n. 季度|Sales rose sharply in the second quarter.|第二季度销售额大幅上升。
+surplus|/ˈsɜːrpləs/|n. 盈余，过剩|The company ended the year with a surplus.|公司以盈余结束了这一年。
+deduct|/dɪˈdʌkt/|v. 扣除|Taxes are deducted from your salary.|税款从你的工资中扣除。
+appreciate|/əˈpriːʃieɪt/|v. 升值；感激|The yen appreciated against the dollar.|日元对美元升值。
+##人事招聘
+recruit|/rɪˈkruːt/|v. 招聘|We plan to recruit ten engineers this year.|我们计划今年招聘十名工程师。
+candidate|/ˈkændɪdət/|n. 候选人，应聘者|The candidate has five years of experience.|这位应聘者有五年经验。
+resume|/ˈrezəmeɪ/|n. 简历|Please submit your resume and cover letter.|请提交你的简历和求职信。
+qualification|/ˌkwɑːlɪfɪˈkeɪʃn/|n. 资格，资历|She has excellent qualifications for the post.|她非常符合这个职位的资历要求。
+probation|/proʊˈbeɪʃn/|n. 试用期|New employees are on probation for three months.|新员工试用期为三个月。
+promote|/prəˈmoʊt/|v. 晋升；推广|He was promoted to regional manager.|他被晋升为区域经理。
+resign|/rɪˈzaɪn/|v. 辞职|She resigned after eight years with the firm.|在该公司工作八年后她辞职了。
+retire|/rɪˈtaɪər/|v. 退休|Our director will retire at the end of the year.|我们的总监将在年底退休。
+benefits|/ˈbenɪfɪts/|n. 福利|The position offers health benefits and a pension.|该职位提供医疗福利和养老金。
+compensation|/ˌkɑːmpenˈseɪʃn/|n. 薪酬，补偿|Compensation is based on experience.|薪酬根据经验确定。
+appraisal|/əˈpreɪzl/|n. 评估，考核|Staff receive an annual performance appraisal.|员工每年接受一次绩效评估。
+vacancy|/ˈveɪkənsi/|n. 空缺，空职|There is a vacancy in the sales team.|销售团队有一个空缺。
+applicant|/ˈæplɪkənt/|n. 申请人|Over 200 applicants applied for the position.|超过200名申请人申请了这个职位。
+personnel|/ˌpɜːrsəˈnel/|n. 人事部门，全体员工|Contact personnel about your vacation days.|关于休假天数请联系人事部门。
+workforce|/ˈwɜːrkfɔːrs/|n. 劳动力，员工总数|The company doubled its workforce in two years.|公司在两年内员工数翻了一番。
+dismiss|/dɪsˈmɪs/|v. 解雇；驳回|He was dismissed for repeated lateness.|他因屡次迟到被解雇。
+incentive|/ɪnˈsentɪv/|n. 激励，奖励|Bonuses are an incentive to work harder.|奖金是更努力工作的激励。
+orientation|/ˌɔːriənˈteɪʃn/|n. 入职培训，情况介绍|New hires attend a two-day orientation.|新员工参加为期两天的入职培训。
+takeover|/ˈteɪkoʊvər/|n. 收购，接管|The takeover was completed last month.|收购于上月完成。
+wage|/weɪdʒ/|n. 工资|Wages are paid on the fifteenth of each month.|工资在每月十五日发放。
+##市场营销
+advertise|/ˈædvərtaɪz/|v. 做广告|The brand advertises mainly on social media.|该品牌主要在社交媒体上做广告。
+campaign|/kæmˈpeɪn/|n. 活动，推广|The spring campaign increased web traffic.|春季推广活动增加了网站流量。
+brand|/brænd/|n. 品牌|Customers trust this brand for quality.|顾客信任这个品牌的质量。
+promotion|/prəˈmoʊʃn/|n. 促销；晋升|The store is running a promotion this weekend.|这家店本周末有促销活动。
+survey|/ˈsɜːrveɪ/|n./v. 调查|A recent survey shows rising demand.|最近的一项调查显示需求上升。
+launch|/lɔːntʃ/|v. 推出，发行|They will launch the new product in June.|他们将在六月推出新产品。
+strategy|/ˈstrætədʒi/|n. 策略|Our marketing strategy focuses on young buyers.|我们的营销策略聚焦年轻消费者。
+sponsor|/ˈspɑːnsər/|v. 赞助 n. 赞助商|The bank sponsors a local sports team.|该银行赞助了一支本地运动队。
+endorse|/ɪnˈdɔːrs/|v. 代言，支持|A famous actor endorsed the new soft drink.|一位知名演员代言了这款新饮料。
+publicity|/pʌbˈlɪsəti/|n. 宣传，曝光|The event generated a lot of publicity.|这场活动带来了大量曝光。
+competitor|/kəmˈpetɪtər/|n. 竞争对手|Our main competitor lowered its prices.|我们的主要竞争对手降低了价格。
+demographic|/ˌdeməˈɡræfɪk/|adj. 人口的 n. 客户群|The survey covers a wide demographic.|这项调查覆盖了广泛的人群。
+retail|/ˈriːteɪl/|n. 零售|Retail sales rose during the holiday season.|节假日期间零售额上升。
+wholesale|/ˈhoʊlseɪl/|adj. 批发的|We buy materials at wholesale prices.|我们以批发价购买材料。
+merchandise|/ˈmɜːrtʃəndaɪs/|n. 商品|All merchandise is discounted by 30 percent.|所有商品一律七折。
+coupon|/ˈkuːpɑːn/|n. 优惠券|Redeem this coupon at any store.|可在任何门店使用此优惠券。
+slogan|/ˈsloʊɡən/|n. 标语，口号|The slogan was memorable and simple.|这个标语简洁又好记。
+logo|/ˈloʊɡoʊ/|n. 标识，徽标|The new logo appears on all packaging.|新标识出现在所有包装上。
+consumer|/kənˈsuːmər/|n. 消费者|Consumers prefer products with clear labels.|消费者偏爱标签清晰的产品。
+outlet|/ˈaʊtlet/|n. 门店，销路|The company opened three new outlets.|公司新开了三家门店。
+##销售采购
+quotation|/kwoʊˈteɪʃn/|n. 报价单|Please send us a quotation for the printer.|请把打印机的报价单发给我们。
+discount|/ˈdɪskaʊnt/|n. 折扣|We can offer a 10 percent discount on bulk orders.|批量订单我们可以给九折。
+warranty|/ˈwɔːrənti/|n. 保修|The laptop comes with a two-year warranty.|这台笔记本有两年保修。
+refund|/ˈriːfʌnd/|n./v. 退款|You may request a refund within 30 days.|你可在30天内申请退款。
+purchase|/ˈpɜːrtʃəs/|v./n. 购买|All purchases must be approved in advance.|所有采购必须事先批准。
+client|/ˈklaɪənt/|n. 客户|The client asked for a detailed timeline.|客户要求提供详细时间表。
+agreement|/əˈɡriːmənt/|n. 协议，同意|Both sides signed the agreement yesterday.|双方昨天签署了协议。
+terms|/tɜːrmz/|n. 条款，条件|Please read the terms carefully before signing.|签署前请仔细阅读条款。
+deliver|/dɪˈlɪvər/|v. 交付，递送|The goods will be delivered within five days.|货物将在五天内交付。
+shipment|/ˈʃɪpmənt/|n. 装运，货物|The shipment arrived two days late.|这批货物晚到了两天。
+inventory|/ˈɪnvəntɔːri/|n. 库存，盘点|We check inventory at the end of each month.|我们每月底盘点库存。
+supplier|/səˈplaɪər/|n. 供应商|We are looking for a reliable supplier.|我们在寻找可靠的供应商。
+vendor|/ˈvendər/|n. 供应商，摊贩|Vendors must register with the city.|供应商必须在市里登记。
+order|/ˈɔːrdər/|n./v. 订单，订购|We placed an order for 500 units.|我们订购了500台。
+bargain|/ˈbɑːrɡən/|n. 便宜货 v. 讨价还价|This model is a real bargain.|这款机型真是划算。
+wholesaler|/ˈhoʊlseɪlər/|n. 批发商|The wholesaler delivers twice a week.|这家批发商每周送货两次。
+##差旅出行
+itinerary|/aɪˈtɪnəreri/|n. 行程表|Your itinerary includes two flights and a train.|你的行程包括两趟航班和一列火车。
+reservation|/ˌrezərˈveɪʃn/|n. 预订|I made a reservation for three nights.|我预订了三晚。
+luggage|/ˈlʌɡɪdʒ/|n. 行李|Passengers may bring one piece of luggage.|乘客可携带一件行李。
+accommodation|/əˌkɑːməˈdeɪʃn/|n. 住宿|The hotel offers comfortable accommodation.|这家酒店提供舒适的住宿。
+departure|/dɪˈpɑːrtʃər/|n. 出发，离开|The departure time has been changed to 6:45.|出发时间已改为6:45。
+arrival|/əˈraɪvl/|n. 到达|Please report to the front desk upon arrival.|到达后请到前台报到。
+delay|/dɪˈleɪ/|n./v. 延误|The flight delay was caused by heavy fog.|航班延误是由大雾造成的。
+customs|/ˈkʌstəmz/|n. 海关|You must declare the goods at customs.|你必须在海关申报这些货物。
+shuttle|/ˈʃʌtl/|n. 班车，摆渡|A free shuttle runs between the airport and the hotel.|机场与酒店之间有免费班车。
+fare|/fer/|n. 车费，票价|The round-trip fare is 300 dollars.|往返票价为300美元。
+terminal|/ˈtɜːrmɪnl/|n. 航站楼，终点站|The flight leaves from Terminal 2.|航班从2号航站楼出发。
+layover|/ˈleɪoʊvər/|n. 中途停留|We had a three-hour layover in Tokyo.|我们在东京中途停留了三小时。
+passport|/ˈpæspɔːrt/|n. 护照|Keep your passport in a safe place.|把护照放在安全的地方。
+destination|/ˌdestɪˈneɪʃn/|n. 目的地|Chicago is our final destination.|芝加哥是我们的最终目的地。
+boarding|/ˈbɔːrdɪŋ/|n. 登机|Boarding begins forty minutes before departure.|登机在起飞前四十分钟开始。
+voucher|/ˈvaʊtʃər/|n. 代金券，凭证|Each guest receives a meal voucher.|每位客人可获得一张餐券。
+excursion|/ɪkˈskɜːrʒn/|n. 短途旅行|The hotel arranges excursions to the coast.|酒店安排前往海岸的短途旅行。
+##客户服务
+complaint|/kəmˈpleɪnt/|n. 投诉，抱怨|We received a complaint about the delay.|我们收到一封关于延误的投诉。
+inquiry|/ɪnˈkwaɪəri/|n. 询问，咨询|All inquiries are answered within 24 hours.|所有咨询都在24小时内答复。
+assistance|/əˈsɪstəns/|n. 帮助，协助|Please call the front desk for assistance.|需要帮助请呼叫前台。
+satisfaction|/ˌsætɪsˈfækʃn/|n. 满意|Customer satisfaction is our top priority.|客户满意度是我们的首要任务。
+resolve|/rɪˈzɑːlv/|v. 解决|The issue was resolved within an hour.|问题在一小时内解决了。
+respond|/rɪˈspɑːnd/|v. 回应，回复|Please respond to the email by noon.|请在中午前回复邮件。
+courteous|/ˈkɜːrtiəs/|adj. 有礼貌的|Our staff are trained to be courteous.|我们的员工受过礼貌待客的培训。
+feedback|/ˈfiːdbæk/|n. 反馈|We value feedback from our customers.|我们重视客户的反馈。
+guarantee|/ˌɡærənˈtiː/|n./v. 保证|We guarantee delivery within 48 hours.|我们保证48小时内送达。
+courtesy|/ˈkɜːrtəsi/|n. 礼貌，好意|As a courtesy, we upgraded her room.|作为礼遇，我们为她升级了房间。
+escalate|/ˈeskəleɪt/|v. 升级处理，加剧|Please escalate the case to the manager.|请把此案上报给经理。
+remedy|/ˈremədi/|n. 补救办法|The company offered a remedy for the error.|公司为这个错误提供了补救方案。
+##物流制造
+warehouse|/ˈwerhaʊs/|n. 仓库|The goods are stored in a warehouse near the port.|货物存放在港口附近的仓库。
+freight|/freɪt/|n. 货运，货物|Freight costs have risen this year.|今年货运成本上涨了。
+packaging|/ˈpækɪdʒɪŋ/|n. 包装|The new packaging is easier to recycle.|新包装更容易回收。
+dispatch|/dɪˈspætʃ/|v. 发货，派遣|We dispatch orders every weekday morning.|我们在每个工作日早上发货。
+distribution|/ˌdɪstrɪˈbjuːʃn/|n. 分销，配送|The company handles distribution across Asia.|公司负责亚洲各地的配送。
+assembly|/əˈsembli/|n. 装配，集会|The assembly line runs 24 hours a day.|装配线24小时运转。
+component|/kəmˈpoʊnənt/|n. 部件，组件|One component failed during testing.|测试中有一个部件失效。
+defective|/dɪˈfektɪv/|adj. 有缺陷的|Defective items can be returned free of charge.|有缺陷的商品可免费退货。
+inspect|/ɪnˈspekt/|v. 检查，视察|Every unit is inspected before shipping.|每台设备在发货前都要检查。
+capacity|/kəˈpæsəti/|n. 产能，容量|The plant has doubled its production capacity.|工厂产能翻了一番。
+efficiency|/ɪˈfɪʃnsi/|n. 效率|New software improved our efficiency.|新软件提高了我们的效率。
+facility|/fəˈsɪləti/|n. 设施，工厂|The company opened a new research facility.|公司开设了一个新的研究设施。
+machinery|/məˈʃiːnəri/|n. 机械|The machinery requires regular maintenance.|这些机械需要定期维护。
+durable|/ˈdʊrəbl/|adj. 耐用的|These boots are light but durable.|这双靴子轻便又耐用。
+specification|/ˌspesɪfɪˈkeɪʃn/|n. 规格，说明|The parts meet our specifications.|这些零件符合我们的规格。
+halt|/hɔːlt/|v./n. 停止|Production halted because of a power failure.|因停电生产停止了。
+output|/ˈaʊtpʊt/|n. 产量，输出|Factory output increased by 8 percent.|工厂产量增长了8%。
+procure|/prəˈkjʊr/|v. 采购，获得|We procured the materials from a local firm.|我们从当地一家公司采购了材料。
+##合同法律
+clause|/klɔːz/|n. 条款|The contract contains a confidentiality clause.|合同包含一条保密条款。
+liable|/ˈlaɪəbl/|adj. 有责任的|The carrier is liable for any damage.|承运人对任何损坏负有责任。
+compliance|/kəmˈplaɪəns/|n. 合规，遵守|All staff must complete compliance training.|所有员工必须完成合规培训。
+violate|/ˈvaɪəleɪt/|v. 违反|The firm violated safety regulations.|该公司违反了安全规定。
+terminate|/ˈtɜːrmɪneɪt/|v. 终止|Either party may terminate the contract with notice.|任何一方通知后均可终止合同。
+amend|/əˈmend/|v. 修订|The agreement was amended last week.|协议上周做了修订。
+binding|/ˈbaɪndɪŋ/|adj. 有约束力的|The decision is legally binding.|该决定具有法律约束力。
+confidential|/ˌkɑːnfɪˈdenʃl/|adj. 机密的|Keep all applicant data confidential.|对所有申请人资料保密。
+patent|/ˈpætnt/|n. 专利|The company holds several patents.|公司拥有几项专利。
+copyright|/ˈkɑːpiraɪt/|n. 版权|The images are protected by copyright.|这些图片受版权保护。
+arbitration|/ˌɑːrbɪˈtreɪʃn/|n. 仲裁|The dispute was settled through arbitration.|争议通过仲裁解决。
+obligation|/ˌɑːblɪˈɡeɪʃn/|n. 义务，责任|The seller has an obligation to deliver on time.|卖方有按时交货的义务。
+##科技办公
+software|/ˈsɔːftwer/|n. 软件|The software is compatible with most systems.|该软件与大多数系统兼容。
+install|/ɪnˈstɔːl/|v. 安装|Install the update before restarting.|重启前先安装更新。
+upgrade|/ˈʌpɡreɪd/|v./n. 升级|We upgraded the server last weekend.|我们上周末升级了服务器。
+database|/ˈdeɪtəbeɪs/|n. 数据库|All records are stored in a central database.|所有记录都存在中央数据库。
+device|/dɪˈvaɪs/|n. 设备，装置|This device connects to the network automatically.|这台设备会自动连接网络。
+access|/ˈækses/|v./n. 访问，使用权|Employees can access the files remotely.|员工可以远程访问这些文件。
+encrypt|/ɪnˈkrɪpt/|v. 加密|Customer data is encrypted before storage.|客户数据在存储前被加密。
+backup|/ˈbækʌp/|n. 备份|Make a backup of the files every night.|每晚备份一次文件。
+compatible|/kəmˈpætəbl/|adj. 兼容的|The app is not compatible with older phones.|这个应用与旧手机不兼容。
+glitch|/ɡlɪtʃ/|n. 小故障|A software glitch delayed the payment.|一个软件故障延迟了付款。
+obsolete|/ˌɑːbsəˈliːt/|adj. 过时的，废弃的|The old system is now obsolete.|旧系统如今已被淘汰。
+implement|/ˈɪmplɪment/|v. 实施|We will implement the changes next quarter.|我们将在下季度实施这些变更。
+technical|/ˈteknɪkl/|adj. 技术的|Please contact technical support.|请联系技术支持。
+network|/ˈnetwɜːrk/|n. 网络|The office network is down this morning.|办公室网络今早瘫痪了。
+##通用高频
+accomplish|/əˈkɑːmplɪʃ/|v. 完成，实现|We accomplished all the goals for the quarter.|我们完成了本季度的所有目标。
+acquire|/əˈkwaɪər/|v. 获得，收购|The group acquired a smaller rival.|该集团收购了一家较小的竞争对手。
+adjust|/əˈdʒʌst/|v. 调整|We adjusted the schedule to save time.|我们调整了日程以节省时间。
+adequate|/ˈædɪkwət/|adj. 足够的|The budget is adequate for the project.|预算对这个项目是够用的。
+advantage|/ədˈvæntɪdʒ/|n. 优势|Low costs give us a competitive advantage.|低成本给我们带来竞争优势。
+alternative|/ɔːlˈtɜːrnətɪv/|n. 替代方案 adj. 备选的|We need an alternative to the current plan.|我们需要一个替代现有方案的选项。
+approximate|/əˈprɑːksɪmət/|adj. 大约的|The approximate cost is 5,000 dollars.|大概的费用是5000美元。
+assess|/əˈses/|v. 评估|Managers assess performance twice a year.|经理每年评估两次绩效。
+assist|/əˈsɪst/|v. 协助|An assistant will assist you during the visit.|参观期间会有助理协助你。
+attempt|/əˈtempt/|v./n. 尝试|They attempted to enter the new market.|他们尝试进入这个新市场。
+available|/əˈveɪləbl/|adj. 可用的，有空的|The product is available in three colors.|该产品有三种颜色可选。
+capable|/ˈkeɪpəbl/|adj. 有能力的|She is capable of handling the account.|她有能力管理这个客户。
+cease|/siːs/|v. 停止|The factory ceased production in May.|工厂在五月停止了生产。
+comply|/kəmˈplaɪ/|v. 遵守|All branches must comply with the policy.|所有分公司都必须遵守该政策。
+consist|/kənˈsɪst/|v. 由……组成|The team consists of six engineers.|该团队由六名工程师组成。
+consult|/kənˈsʌlt/|v. 咨询，查阅|Please consult the manual before calling.|打电话前请先查阅说明书。
+contribute|/kənˈtrɪbjuːt/|v. 贡献，促成|Employees can contribute to the fund monthly.|员工可以每月向基金捐款。
+convert|/kənˈvɜːrt/|v. 转换，改建|The warehouse was converted into offices.|仓库被改建成了办公室。
+decline|/dɪˈklaɪn/|v. 下降；拒绝|Sales declined slightly in January.|一月的销售额略有下降。
+demonstrate|/ˈdemənstreɪt/|v. 演示，证明|The engineer demonstrated the new machine.|工程师演示了新机器。
+determine|/dɪˈtɜːrmɪn/|v. 决定，确定|The manager will determine the final price.|经理将决定最终价格。
+enhance|/ɪnˈhæns/|v. 增强，提高|The update enhances system security.|这次更新增强了系统安全性。
+ensure|/ɪnˈʃʊr/|v. 确保|Please ensure that all doors are locked.|请确保所有门都锁好。
+establish|/ɪˈstæblɪʃ/|v. 建立|The firm was established in 1985.|该公司成立于1985年。
+exceed|/ɪkˈsiːd/|v. 超过|Do not exceed the monthly limit.|不要超过每月限额。
+facilitate|/fəˈsɪlɪteɪt/|v. 促进，使便利|The new software facilitates teamwork.|新软件促进了团队协作。
+frequent|/ˈfriːkwənt/|adj. 频繁的|Frequent flyers receive extra benefits.|常旅客可获得额外福利。
+maintain|/meɪnˈteɪn/|v. 维持，保养|We maintain high standards of service.|我们保持高标准的服务。
+reduce|/rɪˈduːs/|v. 减少|The company reduced waste by 30 percent.|公司减少了30%的浪费。
+sufficient|/səˈfɪʃnt/|adj. 充足的|We have sufficient stock for the season.|这个旺季我们有充足的库存。
+##商务扩展
+accommodate|/əˈkɑːmədeɪt/|v. 容纳；为……提供住宿|The hall can accommodate 300 guests.|大厅可容纳300位客人。
+acknowledge|/əkˈnɑːlɪdʒ/|v. 确认收到；承认|Please acknowledge receipt of this letter.|请确认收到此信。
+allowance|/əˈlaʊəns/|n. 津贴，补助|Each trainee receives a monthly allowance.|每位实习生每月有津贴。
+anticipate|/ænˈtɪsɪpeɪt/|v. 预料，预期|We anticipate strong demand in spring.|我们预计春季需求强劲。
+appliance|/əˈplaɪəns/|n. 家用电器|The store sells kitchen appliances.|这家店销售厨房电器。
+applicable|/ˈæplɪkəbl/|adj. 适用的|This discount is applicable to members only.|此折扣仅适用于会员。
+appoint|/əˈpɔɪnt/|v. 任命，指定|She was appointed head of the department.|她被任命为部门主管。
+assign|/əˈsaɪn/|v. 分配，指派|The task was assigned to the new intern.|这项任务被分配给了新来的实习生。
+authorize|/ˈɔːθəraɪz/|v. 授权，批准|Only managers can authorize refunds.|只有经理可以批准退款。
+beverage|/ˈbevərɪdʒ/|n. 饮料|Free beverages are served in the lounge.|休息室提供免费饮料。
+bid|/bɪd/|n./v. 投标，出价|Three firms submitted bids for the project.|三家公司为这个项目投标。
+brochure|/broʊˈʃʊr/|n. 宣传册|The brochure lists all our tour packages.|宣传册列出了我们所有的旅游套餐。
+certificate|/sərˈtɪfɪkət/|n. 证书|Participants receive a certificate at the end.|参与者最后会获得证书。
+commission|/kəˈmɪʃn/|n. 佣金；委员会|Sales staff earn a 5 percent commission.|销售人员可获得5%的佣金。
+commute|/kəˈmjuːt/|v. 通勤|She commutes to work by subway.|她乘地铁通勤上班。
+complimentary|/ˌkɑːmplɪˈmentri/|adj. 免费赠送的|Guests enjoy a complimentary breakfast.|客人可享用免费早餐。
+comprehensive|/ˌkɑːmprɪˈhensɪv/|adj. 全面的|The report offers a comprehensive review.|这份报告提供了全面的回顾。
+consecutive|/kənˈsekjətɪv/|adj. 连续的|Sales rose for three consecutive months.|销售额连续三个月上升。
+consultant|/kənˈsʌltənt/|n. 顾问|They hired a consultant to improve efficiency.|他们聘请了一位顾问来提高效率。
+corporate|/ˈkɔːrpərət/|adj. 公司的，企业的|Corporate offices are on the tenth floor.|公司办公室在十楼。
+correspondence|/ˌkɔːrəˈspɑːndəns/|n. 信件，通信|All correspondence should be filed by date.|所有信件应按日期归档。
+deficit|/ˈdefɪsɪt/|n. 赤字，亏损|The company reported a small deficit.|公司报告了少量亏损。
+designate|/ˈdezɪɡneɪt/|v. 指定，指派|A designated driver will take you home.|指定司机会送你回家。
+draft|/dræft/|n. 草稿 v. 起草|Please review the first draft of the contract.|请审阅合同初稿。
+eligible|/ˈelɪdʒəbl/|adj. 有资格的|Employees become eligible after one year.|员工满一年后才有资格。
+enroll|/ɪnˈroʊl/|v. 注册，报名|Twenty people enrolled in the workshop.|20人报名参加了研讨会。
+enterprise|/ˈentərpraɪz/|n. 企业|Small enterprises create most new jobs.|小企业创造了大部分新岗位。
+exhibit|/ɪɡˈzɪbɪt/|v. 展出 n. 展品|Local artists will exhibit their work.|当地艺术家将展出他们的作品。
+expand|/ɪkˈspænd/|v. 扩张，扩大|The chain plans to expand into Asia.|这家连锁店计划向亚洲扩张。
+expire|/ɪkˈspaɪər/|v. 到期|Your membership expires in June.|你的会员资格六月到期。
+forecast|/ˈfɔːrkæst/|n./v. 预测|The sales forecast looks optimistic.|销售预测看起来乐观。
+fulfill|/fʊlˈfɪl/|v. 履行，完成|We fulfill orders within two business days.|我们在两个工作日内完成订单。
+headquarters|/ˈhedkwɔːrtərz/|n. 总部|The headquarters are located in Seoul.|总部设在首尔。
+hire|/ˈhaɪər/|v. 雇用|They hired two new accountants.|他们雇了两名新会计。
+insurance|/ɪnˈʃʊrəns/|n. 保险|The company provides health insurance.|公司提供医疗保险。
+lease|/liːs/|n./v. 租约，租赁|We signed a three-year lease on the office.|我们签了三年的办公室租约。
+merger|/ˈmɜːrdʒər/|n. 合并，并购|The merger created the largest bank in Asia.|这次合并产生了亚洲最大的银行。
+mortgage|/ˈmɔːrɡɪdʒ/|n. 抵押贷款|They applied for a 20-year mortgage.|他们申请了20年期的抵押贷款。
+notify|/ˈnoʊtɪfaɪ/|v. 通知|Please notify us of any change in address.|地址有变动请通知我们。
+oversee|/ˌoʊvərˈsiː/|v. 监督，监管|She oversees three regional offices.|她监管三个区域办公室。
+penalty|/ˈpenəlti/|n. 罚款，处罚|A late fee is a penalty for missed deadlines.|滞纳金是对逾期的一种处罚。
+policy|/ˈpɑːləsi/|n. 政策；保险单|The company updated its privacy policy.|公司更新了隐私政策。
+premium|/ˈpriːmiəm/|n. 保险费 adj. 优质的|Premium members get priority seating.|高级会员享有优先座位。
+quota|/ˈkwoʊtə/|n. 配额，指标|Each salesperson has a monthly quota.|每位销售人员都有月度指标。
+relocate|/ˌriːˈloʊkeɪt/|v. 搬迁|The firm will relocate to a larger building.|公司将搬到更大的楼里。
+rental|/ˈrentl/|n. 租金，租借|Car rental is included in the package.|套餐包含租车。
+reputation|/ˌrepjuˈteɪʃn/|n. 声誉|The hotel has an excellent reputation.|这家酒店声誉极佳。
+seminar|/ˈsemɪnɑːr/|n. 研讨会|She attended a seminar on time management.|她参加了一个时间管理研讨会。
+subsidiary|/səbˈsɪdieri/|n. 子公司|The group has five subsidiaries in Europe.|该集团在欧洲有五家子公司。
+turnover|/ˈtɜːrnoʊvər/|n. 营业额；人员流动率|Annual turnover reached 50 million.|年营业额达到5000万。
+venue|/ˈvenjuː/|n. 场地|The hotel is a popular venue for weddings.|这家酒店是热门的婚礼场地。
+workshop|/ˈwɜːrkʃɑːp/|n. 研讨会，车间|The workshop is limited to 15 people.|研讨会限15人参加。
+##高频形动
+affordable|/əˈfɔːrdəbl/|adj. 负担得起的|The area has affordable housing.|这个地区有价格合理的住房。
+ambiguous|/æmˈbɪɡjuəs/|adj. 模糊的，含糊的|The instructions were ambiguous.|这些说明含糊不清。
+arrange|/əˈreɪndʒ/|v. 安排|I will arrange a meeting for Thursday.|我会安排周四开会。
+attendance|/əˈtendəns/|n. 出席，出席人数|Attendance at the fair rose sharply.|展会参观人数大幅上升。
+cite|/saɪt/|v. 引用，提及|The article cites several recent studies.|这篇文章引用了多项近期研究。
+considerable|/kənˈsɪdərəbl/|adj. 相当大的|The repair took a considerable amount of time.|维修花了相当长的时间。
+convenient|/kənˈviːniənt/|adj. 方便的|The hotel is convenient to the airport.|这家酒店离机场很方便。
+criteria|/kraɪˈtɪriə/|n. 标准，准则|Applicants must meet the criteria below.|申请人必须符合以下标准。
+diverse|/daɪˈvɜːrs/|adj. 多样的|The city has a diverse workforce.|这座城市有多元的劳动力。
+domestic|/dəˈmestɪk/|adj. 国内的；家庭的|Domestic sales grew faster than exports.|国内销售增长快于出口。
+eliminate|/ɪˈlɪmɪneɪt/|v. 消除，淘汰|The new system eliminates paperwork.|新系统消除了纸质文件。
+essential|/ɪˈsenʃl/|adj. 必要的，本质的|Clean water is essential for the plant.|清洁的水对工厂至关重要。
+exclusive|/ɪkˈskluːsɪv/|adj. 独家的，独有的|We have exclusive rights to the design.|我们拥有该设计的独家权利。
+flexible|/ˈfleksəbl/|adj. 灵活的|The job offers flexible working hours.|这份工作提供弹性工时。
+fluctuate|/ˈflʌktʃueɪt/|v. 波动|Prices fluctuate with the season.|价格随季节波动。
+generous|/ˈdʒenərəs/|adj. 慷慨的，丰厚的|The company offers a generous pension.|公司提供丰厚的养老金。
+gradually|/ˈɡrædʒuəli/|adv. 逐渐地|Sales gradually recovered in the fall.|销售在秋季逐渐回升。
+indicate|/ˈɪndɪkeɪt/|v. 表明，显示|The chart indicates steady growth.|图表显示稳步增长。
+inevitable|/ɪnˈevɪtəbl/|adj. 不可避免的|Some delays are inevitable in winter.|冬季有些延误是不可避免的。
+ingredient|/ɪnˈɡriːdiənt/|n. 成分，要素|The product uses natural ingredients.|该产品使用天然成分。
+innovative|/ˈɪnəveɪtɪv/|adj. 创新的|They are known for innovative design.|他们以创新设计著称。
+intend|/ɪnˈtend/|v. 打算|We intend to open two new stores.|我们打算开两家新店。
+invest|/ɪnˈvest/|v. 投资|The firm invested heavily in research.|该公司在研发上投入巨资。
+justify|/ˈdʒʌstɪfaɪ/|v. 证明……正当|Can you justify the extra cost?|你能证明这笔额外费用合理吗？
+mandatory|/ˈmændətɔːri/|adj. 强制性的|Safety training is mandatory for all staff.|安全培训对所有员工都是必须的。
+minimum|/ˈmɪnɪməm/|adj. 最低的 n. 最低限度|Orders have a minimum of 50 units.|订单最低50台。
+modify|/ˈmɑːdɪfaɪ/|v. 修改|We modified the design after the feedback.|我们根据反馈修改了设计。
+numerous|/ˈnuːmərəs/|adj. 众多的|Numerous customers praised the service.|众多顾客称赞了这项服务。
+obtain|/əbˈteɪn/|v. 获得|You must obtain approval before ordering.|订购前必须获得批准。
+opportunity|/ˌɑːpərˈtuːnəti/|n. 机会|This is a great opportunity to learn.|这是一个很好的学习机会。
+overall|/ˌoʊvərˈɔːl/|adj. 总体的|Overall costs fell by 6 percent.|总体成本下降了6%。
+persuade|/pərˈsweɪd/|v. 说服|She persuaded the board to approve the plan.|她说服董事会批准了该计划。
+potential|/pəˈtenʃl/|adj. 潜在的 n. 潜力|We are looking for potential partners.|我们正在寻找潜在合作伙伴。
+precise|/prɪˈsaɪs/|adj. 精确的|The report gives precise figures.|报告给出了精确的数字。
+priority|/praɪˈɔːrəti/|n. 优先事项|Safety is our top priority.|安全是我们的首要任务。
+previous|/ˈpriːviəs/|adj. 以前的|The previous manager left in May.|前任经理五月离职。
+proceed|/proʊˈsiːd/|v. 继续进行|We will proceed with the original plan.|我们将按原计划进行。
+prohibit|/prəˈhɪbɪt/|v. 禁止|Smoking is prohibited in the building.|楼内禁止吸烟。
+prompt|/prɑːmpt/|adj. 迅速的 v. 促使|Thank you for your prompt reply.|感谢您的及时回复。
+reliable|/rɪˈlaɪəbl/|adj. 可靠的|We need a reliable delivery service.|我们需要可靠的配送服务。
+relevant|/ˈreləvənt/|adj. 相关的|Please attach all relevant documents.|请附上所有相关文件。
+remarkable|/rɪˈmɑːrkəbl/|adj. 显著的，非凡的|The team made remarkable progress.|团队取得了显著进展。
+restrict|/rɪˈstrɪkt/|v. 限制|Access is restricted to staff only.|仅限员工进入。
+retain|/rɪˈteɪn/|v. 保留|The company struggles to retain talent.|公司难以留住人才。
+shortage|/ˈʃɔːrtɪdʒ/|n. 短缺|There is a shortage of skilled workers.|熟练工人短缺。
+significant|/sɪɡˈnɪfɪkənt/|adj. 重大的|There was a significant drop in sales.|销售额大幅下降。
+submit|/səbˈmɪt/|v. 提交|Submit the form by the end of the week.|周末前提交表格。
+subsequent|/ˈsʌbsɪkwənt/|adj. 随后的|Subsequent orders arrived on time.|随后的订单都按时到达。
+temporary|/ˈtempəreri/|adj. 临时的|We hired temporary staff for the holidays.|我们为假期雇了临时员工。
+thorough|/ˈθɜːroʊ/|adj. 彻底的|The inspector did a thorough check.|检查员做了彻底的检查。
+urgent|/ˈɜːrdʒənt/|adj. 紧急的|This is an urgent request from the client.|这是客户的紧急请求。
+valid|/ˈvælɪd/|adj. 有效的|The coupon is valid until December.|优惠券有效期至十二月。
+verify|/ˈverɪfaɪ/|v. 核实|Please verify the spelling of the name.|请核实名字的拼写。
+willing|/ˈwɪlɪŋ/|adj. 愿意的|Are you willing to work weekends?|你愿意周末上班吗？
+`;
+
+(function(){
+'use strict';
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const DAY = 86400000;
+const INTER = [0, 1, 2, 4, 7, 15, 30, 60, 120];
+const KEY = 'toeic_vocab_state_v1';
+
+const SPK = '<svg viewBox="0 0 24 24"><path d="M4 9.5h3l4-3.5v12l-4-3.5H4z"/><path d="M15.6 8.6a5 5 0 0 1 0 6.8"/><path d="M18.2 6a8.5 8.5 0 0 1 0 12"/></svg>';
+const STAR = '<svg viewBox="0 0 24 24"><path d="m12 3.6 2.6 5.4 5.9.8-4.3 4.2 1.1 5.9L12 17.1l-5.3 2.8 1.1-5.9-4.3-4.2 5.9-.8z"/></svg>';
+const CHECK = '<svg viewBox="0 0 24 24"><path d="m5 12.6 4.6 4.6L19 7.4"/></svg>';
+
+/* ---------- 词库解析 ---------- */
+const BANK = [];
+(function(){
+  let cat = '通用高频';
+  RAW.split('\n').forEach(function(raw){
+    const line = raw.trim();
+    if(!line) return;
+    if(line.indexOf('##') === 0){ cat = line.slice(2).trim(); return; }
+    const p = line.split('|');
+    if(p.length < 5) return;
+    const w = p[0].trim();
+    if(!w) return;
+    for(let i=0;i<BANK.length;i++){ if(BANK[i].w === w) return; }
+    BANK.push({w:w, ph:p[1].trim(), mean:p[2].trim(), ex:p[3].trim(), exZh:p[4].trim(), cat:cat});
+  });
+})();
+let ALL = BANK.slice();
+const IDX = {};
+
+/* ================= 助记：词根拆解 / 谐音联想 ================= */
+const MNEM = {
+"agenda":"a+gen(产生)+da → 会上要「产生」的东西：议程",
+"postpone":"post(往后)+pone(放) → 往后放 → 推迟",
+"convene":"con(共同)+vene(来) → 大家都来 → 召集、开会",
+"adjourn":"ad+journ(日，同 journal) → 改到另一天 → 休会",
+"minutes":"会议记录按「分钟」记 → 分分钟都记下来",
+"attendee":"attend(出席)+ee(被…的人) → 出席者",
+"consensus":"con(共同)+sens(感觉) → 大家感觉一致 → 共识",
+"proposal":"pro(向前)+pos(放) → 摆到前面来的东西 → 提案",
+"negotiate":"neg(不)+oti(闲暇) → 不闲着、来回谈 → 谈判",
+"objective":"ob(对着)+ject(扔) → 朝你扔过来的靶子 → 目标",
+"clarify":"clar(清楚，同 clear)+ify → 讲清楚",
+"summarize":"summary(摘要)+ize → 做摘要",
+"brief":"brief 本义就是「短的」；briefcase 装短文件的包",
+"deadline":"dead(死)+line(线) → 越过就「死」的线 → 截止日",
+"participate":"part(部分)+cip(拿)+ate → 拿一份 → 参与",
+"announce":"an(向)+nounce(报告) → 向大家报告 → 宣布",
+"confirm":"con(加强)+firm(坚固) → 敲结实 → 确认",
+"reschedule":"re(重新)+schedule(日程) → 重排时间",
+"follow-up":"follow(跟着)+up → 跟着再问一次 → 跟进",
+"handout":"hand(手)+out(出去) → 发到手里的纸 → 讲义",
+"stationery":"station(站)+ery → 摆在桌上不动的 → 文具（stationary 才是「静止的」）",
+"photocopy":"photo(光)+copy(复制) → 用光复制 → 复印",
+"envelope":"en(包)+velop(卷) → 把纸卷包起来 → 信封",
+"appointment":"appoint(指定)+ment → 指定好的时刻 → 预约",
+"receptionist":"reception(接待)+ist(人) → 接待员",
+"cubicle":"cube(立方体) → 小方格 → 隔间",
+"memorandum":"memor(记忆) → 帮你记住的那张纸 → 备忘录",
+"archive":"arch(档案，同 archives) → 归档",
+"supervisor":"super(在上)+vis(看)+or → 在上面看着你的人 → 主管",
+"colleague":"col(共同)+league(联盟) → 同一联盟的人 → 同事",
+"procedure":"pro(向前)+ced(走) → 往前走的路 → 流程",
+"maintenance":"main(手，同 manual)+ten(握住) → 用手一直握着 → 维护",
+"renovation":"re(再)+nov(新) → 再变新 → 翻修",
+"equipment":"equip(装备)+ment → 装备物",
+"supplies":"sup(从下)+ply(填) → 不断补上 → 补给、用品",
+"overtime":"over(超过)+time(时间) → 超时干活 → 加班",
+"schedule":"s+chedu(≈车都)+le → 车到点就走 → 时刻表",
+"bulletin":"bullet(子弹) → 像子弹一样快传的消息 → 公告",
+"filing":"file(文件、归档)+ing",
+"errand":"err(走)+and → 跑一趟 → 差事",
+"invoice":"in+voice(说) → 向你要钱的那句话 → 发票",
+"receipt":"re(回)+ceipt(拿，同 receive) → 收到钱的凭据 → 收据",
+"revenue":"re(回)+venue(来) → 回来的钱 → 收入",
+"expense":"ex(出)+pense(付) → 付出去的钱 → 支出",
+"budget":"budg(袋子) → 钱袋子鼓不鼓 → 预算",
+"audit":"audi(听) → 坐下来听你报账 → 审计",
+"asset":"as(到)+set(坐) → 坐得住的底子 → 资产",
+"liability":"li(捆)+ability → 被捆住的责任 → 负债",
+"profit":"pro(向前)+fit(做) → 做出来的好处 → 利润",
+"reimburse":"re(回)+im(进)+burse(钱包) → 钱回到钱包 → 报销",
+"accountant":"account(账户)+ant(人) → 管账的人",
+"transaction":"trans(跨越)+act(做) → 一手交钱一手交货 → 交易",
+"currency":"curr(跑，同 current) → 到处流通的东西 → 货币",
+"installment":"install(安放)+ment → 一块块安上去 → 分期付款",
+"deposit":"de(向下)+posit(放) → 放下去的钱 → 押金、存款",
+"withdraw":"with(往回)+draw(拉) → 往回拉 → 取钱、撤回",
+"fiscal":"fisc(钱袋) → 与钱袋有关 → 财政的",
+"subsidy":"sub(在下)+sid(坐) → 在下面托着你 → 补贴",
+"allocate":"al(向)+loc(地方) → 放到各自的地方 → 分配",
+"estimate":"estim(价值) → 估个价",
+"quarter":"quart(四分之一) → 一年切四块 → 季度",
+"surplus":"sur(超)+plus(多) → 多出来的 → 盈余",
+"deduct":"de(向下)+duct(引) → 往下引走 → 扣除",
+"appreciate":"ap(向)+preci(价格) → 价格往上 → 升值；看重某人 → 感激",
+"recruit":"re(再)+cru(生长) → 让队伍再长出来 → 招聘",
+"candidate":"cand(白，同 candle) → 古罗马竞选穿白袍 → 候选人",
+"resume":"re(再)+sume(拿起) → 再拿起自己的经历 → 简历",
+"qualification":"qual(性质，同 quality)+ify → 具备这种性质 → 资格",
+"probation":"prob(证明，同 prove) → 证明自己的时期 → 试用期",
+"promote":"pro(向前)+mot(动) → 往前动 → 晋升、推广",
+"resign":"re(回)+sign(签字) → 把权力签字交回 → 辞职",
+"retire":"re(回)+tire(拉) → 拉回后方 → 退休",
+"benefits":"bene(好)+fit(做) → 给你做的好事 → 福利",
+"compensation":"com(共同)+pens(称量) → 称一称补给你 → 薪酬、赔偿",
+"appraisal":"ap(向)+prais(价格，同 price) → 给你定价 → 考核",
+"vacancy":"vac(空，同 vacuum) → 空位 → 空缺",
+"applicant":"apply(申请)+ant(人) → 申请人",
+"personnel":"person(人)+nel → 一屋子人 → 人事部门",
+"workforce":"work(工作)+force(力量) → 干活的人力",
+"dismiss":"dis(分开)+miss(送) → 送走 → 解雇",
+"incentive":"in(向内)+cent(唱) → 唱进你心里的调子 → 激励",
+"orientation":"orient(东方) → 先找准方向 → 入职培训",
+"takeover":"take(拿)+over(过来) → 拿过来 → 接管、收购",
+"wage":"wage 古义「许诺、抵押」→ 许诺给你的报酬 → 工资",
+"advertise":"ad(向)+vert(转) → 让注意力转过来 → 做广告",
+"campaign":"camp(营地) → 扎营打仗的一轮 → 活动、战役",
+"brand":"brand 原义「烙印」→ 打在商品上的记号 → 品牌",
+"promotion":"pro(向前)+mot(动) → 往前推 → 促销、晋升",
+"survey":"sur(在上)+vey(看) → 从上往下看一遍 → 调查",
+"launch":"原义「掷出长矛」→ 把产品掷向市场 → 推出",
+"strategy":"strat(军队)+egy → 将军的打法 → 策略",
+"sponsor":"spons(承诺，同 response) → 承诺出钱 → 赞助",
+"endorse":"en(在上)+dorse(背) → 在票据背面签字 → 背书、代言",
+"publicity":"public(公众)+ity → 让公众都知道 → 宣传",
+"competitor":"com(共同)+pet(追求) → 追同一个客户 → 竞争对手",
+"demographic":"demo(人，同 democracy)+graph(写) → 写人的构成 → 人口统计的",
+"retail":"re(再)+tail(切) → 整批再切开零卖 → 零售",
+"wholesale":"whole(整)+sale(卖) → 整批卖 → 批发",
+"merchandise":"merchant(商人)+dise → 商人卖的东西 → 商品",
+"coupon":"coupon 谐音「库朋」→ 到库里领的券 → 优惠券",
+"slogan":"slog(喊) → 喊出来的那句话 → 口号",
+"logo":"log(词，同 logic)+o → 一个词代表一家公司 → 标识",
+"consumer":"con(全)+sum(拿) → 全拿走用掉 → 消费者",
+"outlet":"out(出)+let(让) → 让货出去的店 → 门店",
+"quotation":"quote(引用、报出)+ation → 报给你的价",
+"discount":"dis(去掉)+count(数) → 从总数里去掉 → 折扣",
+"warranty":"warrant(担保)+y → 保修",
+"refund":"re(回)+fund(钱) → 钱回到你手里 → 退款",
+"purchase":"pur(向前)+chase(追) → 追着要买 → 购买",
+"client":"cli(倾斜，同 incline) → 靠向你的人 → 客户",
+"agreement":"a(到)+gree(高兴) → 谈到双方都高兴 → 协议",
+"terms":"term 原义「界限」→ 划清界限 → 条款",
+"deliver":"de(离开)+liver(自由) → 让货自由离开 → 交付",
+"shipment":"ship(船)+ment → 装船运走 → 装运",
+"inventory":"in(进)+vent(来)+ory → 进来的东西 → 库存",
+"supplier":"sup(从下)+ply(填)+er → 从下面补给你的人 → 供应商",
+"vendor":"vend(卖，同 vending machine) → 卖东西的人 → 供应商",
+"order":"order 原义「顺序」→ 按顺序列的单 → 订单",
+"bargain":"bar(柜台)+gain(得) → 在柜台上争来的便宜 → 讨价还价",
+"wholesaler":"wholesale(批发)+r(人) → 批发商",
+"itinerary":"itiner(路程)+ary → 一路的行程表",
+"reservation":"reserve(保留)+ation → 先留住位置 → 预订",
+"luggage":"lug(拖)+gage → 拖着走的东西 → 行李",
+"accommodation":"ac(到)+commod(方便) → 让你住得方便 → 住宿",
+"departure":"de(分开)+part(部分) → 从这里分出去 → 出发",
+"arrival":"arrive(到达)+al",
+"delay":"de(向下)+lay(放) → 往后放一放 → 延误",
+"customs":"custom(习惯) → 老规矩、老关口 → 海关",
+"shuttle":"原义「梭子」→ 来回穿梭 → 班车",
+"fare":"fare 与 fair(公平) 同源 → 该付的公道价 → 车费",
+"terminal":"termin(界限) → 线路的尽头 → 航站楼",
+"layover":"lay(躺)+over(过去) → 躺一会儿再走 → 中途停留",
+"passport":"pass(通过)+port(港口) → 过港口的证 → 护照",
+"destination":"destin(注定)+ation → 注定要去的地方 → 目的地",
+"boarding":"board(甲板、上车) → 上飞机 → 登机",
+"voucher":"vouch(担保) → 能担保价值的纸 → 代金券",
+"excursion":"ex(出)+curs(跑) → 跑出去一趟 → 短途旅行",
+"complaint":"com(共同)+plaint(诉苦) → 一起诉苦 → 投诉",
+"inquiry":"in(向内)+quir(问，同 question) → 往里问 → 询问",
+"assistance":"as(到)+sist(站) → 站到你身边 → 协助",
+"satisfaction":"satis(足够)+fact(做) → 做到足够 → 满意",
+"resolve":"re(再)+solve(解开) → 再解开一次 → 解决",
+"respond":"re(回)+spond(承诺) → 回话 → 回应",
+"courteous":"court(宫廷) → 宫廷里的礼数 → 有礼貌的",
+"feedback":"feed(喂)+back(回) → 把意见喂回来 → 反馈",
+"guarantee":"guarant(担保，同 warrant) → 保证",
+"courtesy":"court(宫廷)+esy → 宫廷礼节 → 礼貌、好意",
+"escalate":"e(向上)+scal(梯子，同 scale) → 一级级往上 → 升级处理",
+"remedy":"re(再)+med(治，同 medicine) → 再治一次 → 补救",
+"warehouse":"ware(货物)+house(房子) → 仓库",
+"freight":"freight 与 fraught(满载) 同源 → 装载的货 → 货运",
+"packaging":"pack(打包)+age → 包装",
+"dispatch":"dis(分开)+patch(脚) → 迈脚送出去 → 发货",
+"distribution":"dis(分开)+tribut(给) → 分开给各处 → 分销",
+"assembly":"as(到)+sembl(一起，同 similar) → 聚到一起 → 装配",
+"component":"com(共同)+pon(放) → 放在一起的部件",
+"defective":"de(坏)+fect(做) → 做坏了 → 有缺陷的",
+"inspect":"in(向内)+spect(看) → 往里看 → 检查",
+"capacity":"cap(拿，同 capture) → 能拿多少 → 容量、产能",
+"efficiency":"ef(出)+fic(做) → 做出来的成果 → 效率",
+"facility":"fac(做)+ility → 做事的地方和条件 → 设施",
+"machinery":"machine(机器)+ry(总称) → 机械",
+"durable":"dur(持续，同 during) → 撑得久 → 耐用的",
+"specification":"spec(看)+ification → 把每个细节都看清 → 规格",
+"halt":"halt 谐音「吼他」→ 吼一声「停」→ 停止",
+"output":"out(出)+put(放) → 放出来的量 → 产量",
+"procure":"pro(为)+cure(关心) → 为你操心弄来 → 采购",
+"clause":"claus(关闭，同 close) → 关起来的一小段 → 条款",
+"liable":"li(捆)+able → 被捆住的 → 有责任的",
+"compliance":"com(全)+pli(填满) → 完全照做 → 合规",
+"violate":"viol(暴力，同 violence) → 用强破规矩 → 违反",
+"terminate":"termin(界限) → 画上句号 → 终止",
+"amend":"a+mend(修补) → 修补条文 → 修订",
+"binding":"bind(捆) → 捆住你 → 有约束力的",
+"confidential":"con(共同)+fid(信任)+ential → 只给信得过的人看 → 机密的",
+"patent":"pat(公开) → 公开技术换保护 → 专利",
+"copyright":"copy(复制)+right(权利) → 复制权 → 版权",
+"arbitration":"arbitr(裁决) → 找人裁决 → 仲裁",
+"obligation":"ob(向)+lig(捆)+ation → 被捆住的事 → 义务",
+"software":"soft(软)+ware(制品) → 软件",
+"install":"in(进)+stall(位置) → 放进位置 → 安装",
+"upgrade":"up(向上)+grade(等级) → 升级",
+"database":"data(数据)+base(基地) → 数据的基地",
+"device":"de(分)+vice(工具) → 单独一件工具 → 装置",
+"access":"ac(到)+cess(走) → 走到跟前 → 访问",
+"encrypt":"en(进)+crypt(地窖) → 放进密室 → 加密",
+"backup":"back(后)+up(顶) → 后面顶上来 → 备份",
+"compatible":"com(共同)+pat(忍受) → 能一起相处 → 兼容的",
+"glitch":"glitch 谐音「个小奇」→ 一个奇怪的小错 → 小故障",
+"obsolete":"ob(离开)+solete(习惯) → 不合习惯了 → 过时的",
+"implement":"im(进)+ple(填满)+ment → 填进去做成 → 实施",
+"technical":"techn(技艺，同 technique)+ical → 技术的",
+"network":"net(网)+work(工作) → 一起干活的网 → 网络",
+"accomplish":"ac(到)+com(全)+pl(填满) → 全填满 → 完成",
+"acquire":"ac(到)+quire(寻求) → 求到手 → 获得",
+"adjust":"ad(向)+just(正好) → 调到正好 → 调整",
+"adequate":"ad(到)+equ(相等) → 达到相等 → 足够的",
+"advantage":"advant(在前，同 advance) → 站在前面 → 优势",
+"alternative":"alter(另一个)+ative → 另一个选项 → 替代方案",
+"approximate":"ap(向)+proxim(最近) → 靠近真值 → 大约的",
+"assess":"as(到)+sess(坐) → 坐到旁边估个价 → 评估",
+"assist":"as(到)+sist(站) → 站到你旁边 → 协助",
+"attempt":"at(向)+tempt(试) → 去试一试 → 尝试",
+"available":"a(能)+vail(价值) → 能派上用场 → 可用的",
+"capable":"cap(拿)+able → 拿得下 → 有能力的",
+"cease":"cease 谐音「死丝」→ 线断了 → 停止",
+"comply":"com(全)+ply(填满) → 完全满足要求 → 遵守",
+"consist":"con(共同)+sist(站) → 站在一起 → 组成",
+"consult":"con(共同)+sult(坐) → 坐下来一起商量 → 咨询",
+"contribute":"con(共同)+tribut(给) → 一起给 → 贡献",
+"convert":"con(全)+vert(转) → 完全转过来 → 转换",
+"decline":"de(向下)+clin(倾斜) → 往下斜 → 下降、拒绝",
+"demonstrate":"de(加强)+monstr(显示) → 摆出来给人看 → 演示",
+"determine":"de(加强)+termin(界限) → 划下界线 → 决定",
+"enhance":"en(使)+hance(高) → 使变高 → 增强",
+"ensure":"en(使)+sure(确定) → 使确定 → 确保",
+"establish":"e(出)+stabl(站稳，同 stable) → 站稳脚跟 → 建立",
+"exceed":"ex(出)+ceed(走) → 走出界限 → 超过",
+"facilitate":"facil(容易，同 facility) → 使容易 → 促进",
+"frequent":"frequ(拥挤) → 一批批挤着来 → 频繁的",
+"maintain":"main(手)+tain(握) → 一直握在手里 → 维持",
+"reduce":"re(回)+duc(引) → 往回引 → 减少",
+"sufficient":"suf(在下)+fic(做) → 底子做够了 → 充足的",
+"accommodate":"ac(到)+commod(方便) → 让人方便住下 → 容纳",
+"acknowledge":"ac(到)+knowledge(知道) → 让人知道收到了 → 确认",
+"allowance":"allow(允许)+ance → 允许你额外拿的 → 津贴",
+"anticipate":"anti(前)+cip(拿) → 提前拿到 → 预料",
+"appliance":"ap(向)+pli(折) → 折来折去用的东西 → 电器",
+"applicable":"apply(适用)+able → 适用的",
+"appoint":"ap(到)+point(点) → 点到你 → 任命",
+"assign":"as(到)+sign(记号) → 打上你的记号 → 分配",
+"authorize":"author(发起人)+ize → 给你发起的权力 → 授权",
+"beverage":"bever(喝) → 喝的东西 → 饮料",
+"bid":"bid 谐音「必得」→ 出价必得 → 投标",
+"brochure":"broch(缝) → 缝起来的小册子 → 宣传册",
+"certificate":"cert(确定，同 certain)+ificate → 证明属实的纸 → 证书",
+"commission":"com(共同)+miss(送) → 交你办的事、给你的钱 → 佣金",
+"commute":"com(共同)+mut(变) → 每天来回换位置 → 通勤",
+"complimentary":"compliment(客气话) → 客气送你的 → 免费赠送的",
+"comprehensive":"com(全)+prehens(抓) → 全抓住 → 全面的",
+"consecutive":"con(共同)+secut(跟随) → 一个跟着一个 → 连续的",
+"consultant":"consult(咨询)+ant(人) → 顾问",
+"corporate":"corpor(整体，同 corpse)+ate → 一个整体 → 公司的",
+"correspondence":"cor(共同)+respond(回应) → 一来一回的信 → 通信",
+"deficit":"de(缺)+fic(做) → 该做的没做够 → 赤字",
+"designate":"de(加强)+sign(记号) → 打上标记 → 指定",
+"draft":"draft 与 draw(拉) 同源 → 拉出来的初稿",
+"eligible":"e(出)+lig(选，同 elect)+ible → 能被选出来的 → 有资格的",
+"enroll":"en(进)+roll(名册) → 进名册 → 报名",
+"enterprise":"enter(进入)+prise(抓) → 敢抓机会的组织 → 企业",
+"exhibit":"ex(出)+hibit(拿) → 拿出来 → 展出",
+"expand":"ex(向外)+pand(铺开) → 向外铺开 → 扩张",
+"expire":"ex(出)+spire(呼吸) → 呼出最后一口气 → 到期",
+"forecast":"fore(前)+cast(扔) → 提前扔出判断 → 预测",
+"fulfill":"ful(满)+fill(填) → 填满 → 履行",
+"headquarters":"head(头)+quarters(驻地) → 头儿待的地方 → 总部",
+"hire":"hire 与「租」同族 → 花钱把人租来 → 雇用",
+"insurance":"insure(确保)+ance → 买一份确保 → 保险",
+"lease":"lease 与 lax(松) 同源 → 松手给别人用 → 租约",
+"merger":"merge(合并)+r → 合并",
+"mortgage":"mort(死)+gage(抵押) → 到死才还完的抵押 → 房贷",
+"notify":"not(知道，同 note)+ify → 让人知道 → 通知",
+"oversee":"over(在上)+see(看) → 在上面看 → 监督",
+"penalty":"penal(惩罚，同 pain)+ty → 处罚",
+"policy":"polic(城邦，同 police) → 城邦的规矩 → 政策",
+"premium":"pre(先)+em(买) → 先付的那笔钱 → 保险费、优质的",
+"quota":"quot(多少，同 quote) → 规定好的量 → 配额",
+"relocate":"re(再)+locate(定位) → 再找个地方 → 搬迁",
+"rental":"rent(租)+al → 租金、租借",
+"reputation":"re(反复)+put(想) → 大家反复念起你 → 声誉",
+"seminar":"semin(种子) → 播下种子的那堂课 → 研讨会",
+"subsidiary":"sub(在下)+sid(坐) → 坐在下面的公司 → 子公司",
+"turnover":"turn(转)+over(过) → 转一圈回来的钱 → 营业额",
+"venue":"ven(来)+ue → 大家都来的地方 → 场地",
+"workshop":"work(工作)+shop(店) → 一起干活的地方 → 研讨会",
+"affordable":"afford(负担得起)+able → 负担得起的",
+"ambiguous":"ambi(两边)+gu(走) → 两边都能走 → 含糊的",
+"arrange":"ar(到)+range(排) → 排好位 → 安排",
+"attendance":"at(到)+tend(伸) → 把注意力伸过去 → 出席",
+"cite":"cite 与 recite(背诵) 同族 → 背出别人的话 → 引用",
+"considerable":"consider(考虑)+able → 值得考虑的量 → 相当大的",
+"convenient":"con(共同)+ven(来) → 大家都来得方便 → 方便的",
+"criteria":"crit(判断，同 criticize) → 判断的依据 → 标准",
+"diverse":"di(分开)+verse(转) → 转向不同方向 → 多样的",
+"domestic":"dom(家，同 dome)+estic → 家里的、国内的",
+"eliminate":"e(出)+limin(门槛) → 赶出门槛 → 消除",
+"essential":"essent(存在，同 essence) → 关乎存在的 → 必要的",
+"exclusive":"ex(出)+clus(关) → 把别人关在门外 → 独家的",
+"flexible":"flex(弯)+ible → 能弯的 → 灵活的",
+"fluctuate":"fluct(流，同 fluid) → 像水一样起伏 → 波动",
+"generous":"gener(生，同 generate) → 天生大方 → 慷慨的",
+"gradually":"grad(步，同 grade) → 一步一级地 → 逐渐",
+"indicate":"in(向内)+dic(说) → 指着说 → 表明",
+"inevitable":"in(不)+evit(避开)+able → 躲不掉的 → 不可避免的",
+"ingredient":"in(进)+gred(走) → 走进去的东西 → 成分",
+"innovative":"in+nov(新)+ative → 不断出新的 → 创新的",
+"intend":"in(向)+tend(伸) → 心思伸向某处 → 打算",
+"invest":"in(进)+vest(衣服) → 穿上这身衣服就投进去 → 投资",
+"justify":"just(公正)+ify → 证明它公正 → 证明正当",
+"mandatory":"mand(命令，同 demand)+atory → 被命令的 → 强制的",
+"minimum":"mini(小)+mum → 最小 → 最低限度",
+"modify":"mod(尺度，同 mode)+ify → 调尺度 → 修改",
+"numerous":"numer(数，同 number)+ous → 数不清的 → 众多的",
+"obtain":"ob(向)+tain(握) → 握到手 → 获得",
+"opportunity":"op(向)+port(港口) → 顺风进港的时机 → 机会",
+"overall":"over(全)+all(所有) → 全部的 → 总体的",
+"persuade":"per(彻底)+suade(劝) → 劝到底 → 说服",
+"potential":"potent(有力)+ial → 还藏着的力量 → 潜在的",
+"precise":"pre(先)+cise(切) → 先切好 → 精确的",
+"priority":"prior(在前)+ity → 排在前面的 → 优先",
+"previous":"pre(前)+vious(走) → 走在前面的 → 以前的",
+"proceed":"pro(向前)+ceed(走) → 往前走 → 继续进行",
+"prohibit":"pro(向前)+hibit(拿) → 挡在前面不让拿 → 禁止",
+"prompt":"pro(向前)+empt(拿) → 抢先拿出来 → 迅速的",
+"reliable":"rely(依靠)+able → 可靠的",
+"relevant":"re(回)+lev(举) → 举回到题上 → 相关的",
+"remarkable":"remark(议论)+able → 值得议论的 → 显著的",
+"restrict":"re(回)+strict(拉紧) → 拉回来绑紧 → 限制",
+"retain":"re(回)+tain(握) → 握住不放 → 保留",
+"shortage":"short(短)+age → 短少了 → 短缺",
+"significant":"sign(记号)+ific → 值得做个记号的 → 重大的",
+"submit":"sub(下)+mit(送) → 送到下面去 → 提交",
+"subsequent":"sub(下)+sequ(跟随) → 跟在后面的 → 随后的",
+"temporary":"tempor(时间，同 tempo)+ary → 一时的 → 临时的",
+"thorough":"thorough 与 through(穿过) 同源 → 穿到底 → 彻底的",
+"urgent":"urg(推，同 urge) → 推着你走 → 紧急的",
+"valid":"val(有力，同 value) → 有力量 → 有效的",
+"verify":"ver(真，同 very)+ify → 证明是真的 → 核实",
+"willing":"will(意愿)+ing → 愿意的"
+};
+
+/* ---------- 状态 ---------- */
+function load(){
+  let s = null;
+  try{ s = JSON.parse(localStorage.getItem(KEY) || 'null'); }catch(e){ s = null; }
+  if(!s || typeof s !== 'object') s = {};
+  s.version = 1;
+  s.settings = Object.assign({dailyNew:20, accent:'en-US', autoSpeak:true, mode:'mix', theme:'light', showMn:true}, s.settings || {});
+  s.words = s.words || {};
+  s.log = s.log || {};
+  s.custom = Array.isArray(s.custom) ? s.custom : [];
+  return s;
+}
+let state = load();
+
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); }
+  catch(e){ toast('浏览器存储写入失败，进度可能无法保存'); }
+}
+function rebuildAll(){
+  const base = [];
+  const seen = {};
+  BANK.forEach(function(x){
+    seen[x.w] = 1;
+    base.push({w:x.w, ph:x.ph, mean:x.mean, ex:x.ex, exZh:x.exZh, cat:x.cat, mn: MNEM[x.w] || ''});
+  });
+  state.custom.forEach(function(x){
+    if(!x || !x.w || seen[x.w]) return;
+    seen[x.w] = 1;
+    base.push({w:x.w, ph:x.ph||'', mean:x.mean||'', ex:x.ex||'', exZh:x.exZh||'', cat:x.cat||'自定义', mn:x.mn || MNEM[x.w] || ''});
+  });
+  ALL = base;
+  for(const k in IDX) delete IDX[k];
+  base.forEach(function(x, i){ IDX[x.w] = i; });
+}
+
+/* ---------- 工具 ---------- */
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+  });
+}
+function mnHtml(it, cls){
+  if(!it || !it.mn || !state.settings.showMn) return '';
+  return '<div class="fc-mn' + (cls ? ' ' + cls : '') + '"><span class="mn-tag">助记</span>' + esc(it.mn) + '</div>';
+}
+function todayKey(d){  const t = new Date((d || new Date()).getTime() - (d || new Date()).getTimezoneOffset()*60000);
+  return t.toISOString().slice(0,10);
+}
+function dayShift(n){
+  const d = new Date(); d.setHours(12,0,0,0);
+  d.setDate(d.getDate() - n);
+  return d;
+}
+function shuffle(a){
+  const r = a.slice();
+  for(let i=r.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); const t=r[i]; r[i]=r[j]; r[j]=t; }
+  return r;
+}
+let toastTimer = null;
+function toast(msg){
+  const el = $('#toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 2200);
+}
+
+/* ---------- 发音 ---------- */
+let voices = [];
+function loadVoices(){ try{ voices = window.speechSynthesis.getVoices() || []; }catch(e){ voices = []; } }
+if('speechSynthesis' in window){
+  loadVoices();
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+}
+function speak(text){
+  if(!('speechSynthesis' in window)) { toast('当前浏览器不支持语音朗读，建议使用 Chrome / Edge'); return; }
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = state.settings.accent;
+    u.rate = 0.92;
+    const target = state.settings.accent.toLowerCase();
+    let v = null;
+    for(let i=0;i<voices.length;i++){
+      const lang = (voices[i].lang||'').replace('_','-').toLowerCase();
+      if(lang === target){ v = voices[i]; break; }
+    }
+    if(!v){ for(let i=0;i<voices.length;i++){ if((voices[i].lang||'').toLowerCase().indexOf('en') === 0){ v = voices[i]; break; } } }
+    if(v) u.voice = v;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ---------- 统计 ---------- */
+function snap(){
+  const now = Date.now(), tk = todayKey();
+  const day = state.log[tk] || {n:0, new:0, review:0, ok:0, bad:0};
+  let due = 0, learned = 0, mastered = 0;
+  for(const k in state.words){
+    const r = state.words[k];
+    if(!r || !r.seen) continue;
+    learned++;
+    if(r.b >= 5) mastered++;
+    if(r.due <= now) due++;
+  }
+  const newQuota = Math.max(0, state.settings.dailyNew - (day.new||0));
+  const newLeft = Math.min(newQuota, Math.max(0, ALL.length - learned));
+  const remain = due + newLeft;
+  const total = (day.n||0) + remain;
+  return {
+    day: day, due: due, learned: learned, mastered: mastered,
+    newLeft: newLeft, remain: remain, todayDone: day.n || 0,
+    progress: total > 0 ? Math.min(1, (day.n||0) / total) : 1,
+    acc: (day.ok + day.bad) > 0 ? Math.round(day.ok/(day.ok+day.bad)*100) : 0,
+    streak: streak(), totalWords: ALL.length
+  };
+}
+function streak(){
+  let n = 0;
+  let d = new Date();
+  if(!(state.log[todayKey(d)] || {}).n) d = dayShift(1);
+  for(let i=0;i<400;i++){
+    const k = todayKey(d);
+    if((state.log[k] || {}).n > 0){ n++; d = new Date(d.getTime() - DAY); }
+    else break;
+  }
+  return n;
+}
+
+/* ---------- 主题 / 导航 ---------- */
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme', state.settings.theme === 'dark' ? 'dark' : 'light');
+}
+let currentView = 'home';
+const TITLES = {home:'今日学习', study:'开始背词', words:'词库', stats:'学习统计', settings:'设置'};
+function go(view){
+  currentView = view;
+  $$('.view').forEach(function(v){ v.hidden = (v.id !== 'view-' + view); });
+  $$('.nav-item').forEach(function(b){ b.classList.toggle('active', b.dataset.view === view); });
+  $('#tbTitle').textContent = TITLES[view] || '';
+  window.scrollTo({top:0, behavior:'smooth'});
+  if(view === 'home') renderHome();
+  if(view === 'words') { renderWordsList(); }
+  if(view === 'stats') renderStats();
+  if(view === 'study') renderStudyView();
+  if(view === 'settings') syncSettings();
+}
+
+/* ---------- 首页 ---------- */
+function renderHome(){
+  const s = snap();
+  const C = 2 * Math.PI * 52;
+  const off = C * (1 - s.progress);
+  const h = new Date().getHours();
+  const greet = h < 6 ? 'NIGHT OWL' : h < 11 ? 'GOOD MORNING' : h < 18 ? 'GOOD AFTERNOON' : 'GOOD EVENING';
+  const headline = s.remain > 0 ? (s.due > 0 ? '先复习 ' + s.due + ' 个词，再学 ' + s.newLeft + ' 个新词' : '今天学 ' + s.newLeft + ' 个新词')
+                                : '今天的任务已完成';
+  const subline = '词库共 ' + s.totalWords + ' 词 · 已学 ' + s.learned + ' · 已掌握 ' + s.mastered;
+
+  let chart = '';
+  for(let i=6;i>=0;i--){
+    const d = dayShift(i);
+    const k = todayKey(d);
+    const v = (state.log[k] || {}).n || 0;
+    const max = Math.max(20, (function(){ let m=0; for(let j=0;j<7;j++){ const nv=(state.log[todayKey(dayShift(j))]||{}).n||0; if(nv>m) m=nv; } return m; })());
+    const hh = Math.max(v > 0 ? 8 : 3, Math.round(v / max * 100));
+    chart += '<div class="col' + (i===0 ? ' today' : '') + '">' +
+      '<div class="bar' + (v===0 ? ' empty' : '') + '" style="height:' + hh + '%" title="' + k + '：' + v + ' 词"></div>' +
+      '<div class="lb">' + (i===0 ? '今天' : (d.getMonth()+1) + '/' + d.getDate()) + '</div></div>';
+  }
+
+  const modes = [['mix','混合'],['card','卡片'],['choice','选择'],['spell','拼写']];
+  let seg = '';
+  modes.forEach(function(m){
+    seg += '<button class="' + (state.settings.mode === m[0] ? 'on' : '') + '" data-mode="' + m[0] + '">' + m[1] + '</button>';
+  });
+
+  $('#view-home').innerHTML =
+    '<div class="hero">' +
+      '<div class="hero-left">' +
+        '<div class="hero-kicker">' + greet + '</div>' +
+        '<h1>' + esc(headline) + '</h1>' +
+        '<div class="hero-sub">' + esc(subline) + '</div>' +
+        '<div class="hero-btns">' +
+          '<button class="btn primary" id="btnStart">' + (s.remain > 0 ? '开始学习' : '自由练习') + '</button>' +
+          '<button class="btn ghost" id="btnPractice">随机复习 20 词</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="hero-ring">' +
+        '<svg width="132" height="132" viewBox="0 0 132 132">' +
+          '<circle class="ring-bg" cx="66" cy="66" r="52"/>' +
+          '<circle class="ring-fg" cx="66" cy="66" r="52" stroke-dasharray="' + C + '" stroke-dashoffset="' + off + '"/>' +
+        '</svg>' +
+        '<div class="ring-label"><b>' + s.todayDone + '</b><span>今日已学</span></div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="tiles">' +
+      '<div class="tile"><div class="k">待复习</div><div class="v">' + s.due + '<small>词</small></div></div>' +
+      '<div class="tile"><div class="k">待学新词</div><div class="v">' + s.newLeft + '<small>词</small></div></div>' +
+      '<div class="tile"><div class="k">已掌握</div><div class="v">' + s.mastered + '<small>词</small></div></div>' +
+      '<div class="tile"><div class="k">今日正确率</div><div class="v">' + s.acc + '<small>%</small></div></div>' +
+    '</div>' +
+    '<div class="card pad">' +
+      '<div class="row between" style="margin-bottom:10px"><h3 style="margin:0">学习模式</h3><span class="muted">决定复习词怎么考你</span></div>' +
+      '<div class="seg" id="modeSeg">' + seg + '</div>' +
+    '</div>' +
+    '<div class="card pad">' +
+      '<div class="row between" style="margin-bottom:2px"><h3 style="margin:0">最近 7 天</h3><span class="muted">连续打卡 ' + s.streak + ' 天</span></div>' +
+      '<div class="chart">' + chart + '</div>' +
+    '</div>';
+
+  $('#btnStart').onclick = function(){
+    const q = buildQueue();
+    if(q.length) startSession(q);
+    else startSession(buildPractice());
+  };
+  $('#btnPractice').onclick = function(){ startSession(buildPractice()); };
+  $$('#modeSeg button').forEach(function(b){
+    b.onclick = function(){
+      state.settings.mode = b.dataset.mode;
+      save();
+      $$('#modeSeg button').forEach(function(x){ x.classList.toggle('on', x === b); });
+      toast('学习模式已切换');
+    };
+  });
+  $('#sideStreak').textContent = s.streak;
+}
+
+/* ---------- 队列 ---------- */
+function buildQueue(){
+  const now = Date.now(), tk = todayKey();
+  const day = state.log[tk] || {new:0};
+  const due = [];
+  for(const k in state.words){
+    const r = state.words[k];
+    if(r && r.seen && r.due <= now && IDX[k] != null) due.push(ALL[IDX[k]]);
+  }
+  due.sort(function(a,b){ return state.words[a.w].due - state.words[b.w].due; });
+  const quota = Math.max(0, state.settings.dailyNew - (day.new || 0));
+  const fresh = ALL.filter(function(x){ const r = state.words[x.w]; return !r || !r.seen; }).slice(0, quota);
+  const q = [];
+  const r = due.slice(), n = fresh.slice();
+  while(r.length || n.length){
+    for(let k=0;k<3 && r.length;k++) q.push({item:r.shift(), isNew:false});
+    if(n.length) q.push({item:n.shift(), isNew:true});
+  }
+  return q;
+}
+function buildPractice(){
+  const learned = ALL.filter(function(x){ const r = state.words[x.w]; return r && r.seen > 0; });
+  const pool = learned.length >= 8 ? learned : ALL;
+  return shuffle(pool).slice(0, 20).map(function(x){ return {item:x, isNew:false}; });
+}
+
+/* ---------- 学习会话 ---------- */
+let session = null;
+let ctx = null;
+
+function pickMode(){
+  const m = state.settings.mode;
+  if(m === 'card') return 'card';
+  if(m === 'choice') return Math.random() < 0.5 ? 'choice-en' : 'choice-zh';
+  if(m === 'spell') return 'spell';
+  const r = Math.random();
+  return r < 0.4 ? 'card' : r < 0.68 ? 'choice-en' : r < 0.86 ? 'choice-zh' : 'spell';
+}
+function startSession(q){
+  if(!q || !q.length){ toast('没有可以学习的单词'); return; }
+  session = {q:q, i:0, t0:Date.now(), stats:{new:0, ok:0, bad:0}, retried:{}, done:{}};
+  go('study');
+}
+function renderStudyView(){
+  if(session){ renderCard(); return; }
+  const s = snap();
+  $('#studyBody').innerHTML =
+    '<div class="done-card">' +
+      '<div class="done-ic">' + CHECK + '</div>' +
+      '<h2>' + (s.remain > 0 ? '准备好就开始' : '今天的任务已完成') + '</h2>' +
+      '<div class="done-sub">' + (s.remain > 0
+        ? '待复习 ' + s.due + ' 个词，待学新词 ' + s.newLeft + ' 个'
+        : '想多背一会儿的话，可以随机复习已学过的词') + '</div>' +
+      '<div class="row" style="justify-content:center;gap:10px;flex-wrap:wrap">' +
+        '<button class="btn primary" id="btnBegin">' + (s.remain > 0 ? '开始学习' : '自由练习 20 词') + '</button>' +
+      '</div>' +
+    '</div>';
+  $('#btnBegin').onclick = function(){
+    const q = buildQueue();
+    startSession(q.length ? q : buildPractice());
+  };
+}
+
+function renderCard(){
+  const host = $('#studyBody');
+  if(!session) { renderStudyView(); return; }
+  if(session.i >= session.q.length){ renderSummary(); return; }
+  if(session.done && session.done[session.i]){ renderReviewCard(); return; }
+  const cur = session.q[session.i];
+  const it = cur.item;
+  if(!cur.mode) cur.mode = cur.isNew ? 'card' : pickMode();
+  const mode = cur.mode;
+  const pct = Math.round(session.i / session.q.length * 100);
+  const rec = state.words[it.w];
+  const starred = rec && rec.star;
+  const top =
+    '<div class="study-top">' +
+      '<div class="pbar"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="ptxt"><b>' + (session.i + 1) + '</b> / ' + session.q.length + '</div>' +
+    '</div>';
+  const tag =
+    '<div class="fc-tag">' +
+      (cur.isNew ? '<span class="pill new">新词</span>' : '<span class="pill rev">复习</span>') +
+      '<span class="pill cat">' + esc(it.cat) + '</span>' +
+      '<button class="star' + (starred ? ' on' : '') + '" id="btnStar" title="收藏">' + STAR + '</button>' +
+    '</div>';
+
+  let body = '';
+  if(mode === 'card'){
+    body =
+      '<div class="fc" id="fc">' + tag +
+        '<div class="fc-main">' +
+          '<div class="fc-word">' + esc(it.w) + '</div>' +
+          '<div class="fc-ph"><span>' + esc(it.ph) + '</span><button class="ic" data-speak="' + esc(it.w) + '">' + SPK + '</button></div>' +
+        '</div>' +
+        '<div class="fc-back">' +
+          '<div class="fc-mean">' + esc(it.mean) + '</div>' +
+          mnHtml(it) +
+          (it.ex ? '<div class="fc-ex" style="margin-top:10px"><p>' + esc(it.ex) + '</p><p class="exzh">' + esc(it.exZh) + '</p></div>' : '') +
+        '</div>' +
+        '<div class="fc-hint">按 <kbd>空格</kbd> 显示释义</div>' +
+      '</div>' +
+      '<div class="grades" id="grades" hidden>' +
+        '<button class="g g0" data-g="0"><span>不认识</span><kbd>1</kbd></button>' +
+        '<button class="g g1" data-g="1"><span>模糊</span><kbd>2</kbd></button>' +
+        '<button class="g g2" data-g="2"><span>认识</span><kbd>3</kbd></button>' +
+      '</div>';
+  } else if(mode === 'choice-en' || mode === 'choice-zh'){
+    const opts = makeOptions(it, mode === 'choice-en' ? 'cn' : 'en');
+    let optHtml = '';
+    opts.forEach(function(o, i){
+      optHtml += '<button class="opt" data-ok="' + (o.ok ? 1 : 0) + '">' +
+        '<span class="ol">' + 'ABCD'[i] + '</span><span>' + esc(o.text) + '</span></button>';
+    });
+    body =
+      '<div class="q-card">' +
+        '<div class="q-tag" style="display:flex;align-items:center">' + (mode === 'choice-en' ? '选出正确的中文释义' : '选出对应的英文单词') +
+          '<button class="star' + (starred ? ' on' : '') + '" id="btnStar" title="收藏">' + STAR + '</button></div>' +
+        (mode === 'choice-en'
+          ? '<div class="q-word">' + esc(it.w) + '<button class="ic" data-speak="' + esc(it.w) + '">' + SPK + '</button></div><div class="q-ph">' + esc(it.ph) + '</div>'
+          : '<div class="q-mean">' + esc(it.mean) + '</div>') +
+        '<div class="opts" id="opts">' + optHtml + '</div>' +
+        '<div class="fb" id="fb" hidden></div>' +
+      '</div>';
+  } else {
+    body =
+      '<div class="q-card">' +
+        '<div class="q-tag" style="display:flex;align-items:center">根据释义拼写单词' +
+          '<button class="star' + (starred ? ' on' : '') + '" id="btnStar" title="收藏">' + STAR + '</button></div>' +
+        '<div class="q-mean">' + esc(it.mean) + '</div>' +
+        '<div class="spell-row">' +
+          '<input id="spellIn" class="spell-in" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="输入英文单词，回车提交">' +
+          '<button class="btn primary" id="spellCheck">检查</button>' +
+        '</div>' +
+        '<div class="spell-hint" id="spellHintWrap">提示：' + it.w.length + ' 个字母，首字母 ' + it.w.charAt(0).toUpperCase() +
+          ' <button class="link" id="spellHint">再给点提示</button>' +
+          ' <button class="link" id="spellGive">不会，看答案</button>' +
+        '</div>' +
+        '<div class="fb" id="fb" hidden></div>' +
+      '</div>';
+  }
+
+  host.innerHTML = top + body + navBar();
+  ctx = {cur:cur, item:it, mode:mode, flipped:false, answered:false, done:false, pendingGrade:0};
+
+  const bs = $('#btnStar');
+  if(bs) bs.onclick = function(e){ e.stopPropagation(); toggleStar(it.w); renderCard(); };
+  bindNav();
+
+  if(mode === 'card'){
+    $('#fc').onclick = function(e){ if(e.target.closest('.ic')) return; flipCard(); };
+    $$('.grades .g').forEach(function(b){
+      b.onclick = function(){ answer(parseInt(b.dataset.g, 10)); };
+    });
+    if(state.settings.autoSpeak) speak(it.w);
+  } else if(mode === 'choice-en' || mode === 'choice-zh'){
+    $$('#opts .opt').forEach(function(b){
+      b.onclick = function(){ answerChoice(b); };
+    });
+  } else {
+    const inp = $('#spellIn');
+    inp.focus();
+    inp.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){ e.preventDefault(); checkSpell(); }
+    });
+    $('#spellCheck').onclick = checkSpell;
+    $('#spellHint').onclick = function(){
+      const w = it.w;
+      const n = Math.min(w.length, Math.max(2, Math.ceil(w.length/2)));
+      toast(w.slice(0, n) + '⋯（共 ' + w.length + ' 字母）');
+    };
+    $('#spellGive').onclick = function(){
+      if(!ctx || ctx.answered) return;
+      ctx.answered = true;
+      ctx.pendingGrade = 0;
+      inp.value = it.w;
+      inp.classList.add('wrong');
+      showFb(false, it);
+    };
+  }
+}
+
+function flipCard(){
+  if(!ctx || ctx.mode !== 'card' || ctx.flipped) return;
+  ctx.flipped = true;
+  $('#fc').classList.add('flipped');
+  $('#grades').hidden = false;
+}
+
+/* ---------- 前后翻页 ---------- */
+function navBar(){
+  const isReview = !!(session.done && session.done[session.i]);
+  const canPrev = session.i > 0;
+  const canNext = isReview && (session.i + 1 <= session.q.length);
+  return '<div class="studynav">' +
+    '<button class="navbtn" id="btnPrev"' + (canPrev ? '' : ' disabled') + (canPrev ? ' title="看上一个词（←）"' : ' title="已经是第一个了"') + '>← 上一个</button>' +
+    '<div class="navpos">' + (isReview ? '回看第 ' + (session.i + 1) + ' 个' : '第 ' + (session.i + 1) + ' / ' + session.q.length + ' 个') + '</div>' +
+    '<button class="navbtn" id="btnNextCard"' + (canNext ? ' title="往回翻（→）"' : ' disabled title="先作答，才会翻到下一个词"') + '>下一个 →</button>' +
+  '</div>';
+}
+function bindNav(){
+  const p = $('#btnPrev'), n = $('#btnNextCard');
+  if(p) p.onclick = goPrev;
+  if(n) n.onclick = goNext;
+}
+function goPrev(){
+  if(!session || session.i <= 0) return;
+  session.i--;
+  renderCard();
+}
+function goNext(){
+  if(!session) return;
+  if(!session.done || !session.done[session.i]) return;
+  if(session.i + 1 > session.q.length) return;
+  session.i++;
+  renderCard();
+}
+
+/* 回看已作答的卡片 */
+function renderReviewCard(){
+  const cur = session.q[session.i];
+  const it = cur.item;
+  const d = session.done[session.i];
+  const pct = Math.round(session.i / session.q.length * 100);
+  const rec = state.words[it.w];
+  const starred = rec && rec.star;
+  let verdict;
+  if(d.mode === 'card'){
+    const cls = d.grade === 2 ? 'okp' : d.grade === 1 ? 'warnp' : 'badp';
+    const name = ['不认识', '模糊', '认识'][d.grade] || '—';
+    verdict = '<div class="revline"><span class="pill ' + cls + '">' + name + '</span>卡片自评</div>';
+  } else {
+    const cls = d.correct ? 'okp' : 'badp';
+    const mtxt = d.mode === 'spell' ? '拼写题' : '选择题';
+    const extra = d.correct ? mtxt : (d.picked ? mtxt + ' · 你的答案：' + esc(d.picked) : mtxt + ' · 直接看了答案');
+    verdict = '<div class="revline"><span class="pill ' + cls + '">' + (d.correct ? '答对' : '答错') + '</span>' + extra + '</div>';
+  }
+  $('#studyBody').innerHTML =
+    '<div class="study-top">' +
+      '<div class="pbar"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="ptxt"><b>' + (session.i + 1) + '</b> / ' + session.q.length + '</div>' +
+    '</div>' +
+    '<div class="fc rev-card flipped">' +
+      '<div class="fc-tag">' +
+        '<span class="pill rev2">回看</span>' +
+        '<span class="pill cat">' + esc(it.cat) + '</span>' +
+        '<button class="star' + (starred ? ' on' : '') + '" id="btnStar" title="收藏">' + STAR + '</button>' +
+      '</div>' +
+      '<div class="fc-main">' +
+        '<div class="fc-word">' + esc(it.w) + '</div>' +
+        '<div class="fc-ph"><span>' + esc(it.ph) + '</span><button class="ic" data-speak="' + esc(it.w) + '">' + SPK + '</button></div>' +
+      '</div>' +
+      '<div class="fc-back">' +
+        '<div class="fc-mean">' + esc(it.mean) + '</div>' +
+        mnHtml(it) +
+        (it.ex ? '<div class="fc-ex" style="margin-top:10px"><p>' + esc(it.ex) + '</p><p class="exzh">' + esc(it.exZh) + '</p></div>' : '') +
+      '</div>' +
+    '</div>' +
+    verdict +
+    navBar();
+  ctx = null;
+  const bs = $('#btnStar');
+  if(bs) bs.onclick = function(e){ e.stopPropagation(); toggleStar(it.w); renderCard(); };
+  bindNav();
+}
+
+function makeOptions(item, kind){
+  const near = [], far = [];
+  ALL.forEach(function(x){
+    if(x.w === item.w) return;
+    if(x.cat === item.cat) near.push(x); else far.push(x);
+  });
+  const src = shuffle(near).concat(shuffle(far));
+  const opts = [{text: kind === 'cn' ? item.mean : item.w, ok:true}];
+  for(let i=0;i<src.length && opts.length<4;i++){
+    const t = kind === 'cn' ? src[i].mean : src[i].w;
+    let dup = false;
+    for(let j=0;j<opts.length;j++){ if(opts[j].text === t){ dup = true; break; } }
+    if(!dup) opts.push({text:t, ok:false});
+  }
+  return shuffle(opts);
+}
+
+function showFb(ok, item){
+  const fb = $('#fb');
+  if(!fb) return;
+  fb.className = 'fb ' + (ok ? 'ok' : 'no');
+  fb.innerHTML =
+    '<div class="fb-h">' + (ok ? '回答正确' : '正确答案') + '</div>' +
+    '<p><b>' + esc(item.w) + '</b> <span class="zh">' + esc(item.ph) + '</span> — ' + esc(item.mean) + '</p>' +
+    (item.ex ? '<p class="zh">' + esc(item.ex) + '</p><p class="zh">' + esc(item.exZh) + '</p>' : '') +
+    mnHtml(item) +
+    '<div class="fb-actions"><button class="btn primary sm" id="btnNext">继续</button></div>';
+  fb.hidden = false;
+  $('#btnNext').onclick = function(){ answer(ctx.pendingGrade); };
+}
+
+function answerChoice(btn){
+  if(!ctx || ctx.answered) return;
+  ctx.answered = true;
+  const ok = btn.dataset.ok === '1';
+  $$('#opts .opt').forEach(function(o){
+    o.disabled = true;
+    if(o.dataset.ok === '1') o.classList.add('right');
+  });
+  if(!ok) btn.classList.add('wrong');
+  ctx.picked = btn.innerText.replace(/^[A-D]\s*/, '').trim();
+  ctx.pendingGrade = ok ? 2 : 0;
+  showFb(ok, ctx.item);
+}
+
+function checkSpell(){
+  if(!ctx || ctx.answered) return;
+  const inp = $('#spellIn');
+  if(!inp) return;
+  const val = (inp.value || '').trim().toLowerCase();
+  if(!val){ toast('先输入答案再提交'); return; }
+  ctx.answered = true;
+  const ok = val === ctx.item.w.toLowerCase();
+  inp.classList.add(ok ? 'right' : 'wrong');
+  inp.disabled = true;
+  ctx.picked = val;
+  ctx.pendingGrade = ok ? 2 : 0;
+  showFb(ok, ctx.item);
+}
+
+function answer(g){
+  if(!session) return;
+  const cur = session.q[session.i];
+  if(!cur) return;
+  if(ctx && ctx.done) return;
+  if(ctx) ctx.done = true;
+
+  session.done[session.i] = {
+    grade: g,
+    mode: ctx ? ctx.mode : 'card',
+    correct: g === 2,
+    picked: ctx ? (ctx.picked || '') : ''
+  };
+
+  const it = cur.item;
+  const w = it.w;
+  let rec = state.words[w];
+  if(!rec){ rec = state.words[w] = {b:0, due:0, seen:0, ok:0, bad:0, star:false, first:Date.now()}; }
+  const wasNew = !rec.seen;
+  rec.seen = (rec.seen || 0) + 1;
+  rec.last = Date.now();
+
+  if(g === 0){ rec.b = 0; rec.bad = (rec.bad||0) + 1; rec.due = Date.now() + 8*60*1000; }
+  else if(g === 1){
+    rec.b = Math.max(1, rec.b || 0);
+    rec.bad = (rec.bad||0) + 1;
+    rec.due = Date.now() + Math.max(0.4, INTER[rec.b] * 0.55) * DAY;
+  } else {
+    rec.b = Math.min(8, (rec.b || 0) + 1);
+    rec.ok = (rec.ok||0) + 1;
+    rec.due = Date.now() + INTER[rec.b] * DAY;
+  }
+
+  const tk = todayKey();
+  const day = state.log[tk] || (state.log[tk] = {n:0, new:0, review:0, ok:0, bad:0});
+  day.n++;
+  if(wasNew){ day.new++; session.stats.new++; } else { day.review = (day.review||0) + 1; }
+  if(g === 2){ day.ok++; session.stats.ok++; } else { day.bad++; session.stats.bad++; }
+
+  if(g === 0 && !session.retried[w]){
+    session.retried[w] = 1;
+    session.q.push({item:it, isNew:false, mode:'card'});
+  }
+
+  save();
+  $('#sideStreak').textContent = streak();
+  session.i++;
+  renderCard();
+}
+
+function renderSummary(){
+  const st = session.stats;
+  const dur = Math.max(1, Math.round((Date.now() - session.t0) / 1000));
+  const total = st.ok + st.bad;
+  const acc = total ? Math.round(st.ok/total*100) : 0;
+  const mins = dur >= 60 ? Math.floor(dur/60) + '分' + (dur%60) + '秒' : dur + '秒';
+  const s = snap();
+  $('#studyBody').innerHTML =
+    '<div class="done-card">' +
+      '<div class="done-ic">' + CHECK + '</div>' +
+      '<h2>这一组完成了</h2>' +
+      '<div class="done-sub">今天累计学习 ' + s.todayDone + ' 个词 · 连续打卡 ' + s.streak + ' 天</div>' +
+      '<div class="done-grid">' +
+        '<div><b>' + st.new + '</b><span>新学</span></div>' +
+        '<div><b>' + (total) + '</b><span>答题</span></div>' +
+        '<div><b>' + acc + '%</b><span>正确率</span></div>' +
+        '<div><b>' + mins + '</b><span>用时</span></div>' +
+      '</div>' +
+      '<div class="row" style="justify-content:center;gap:10px;flex-wrap:wrap">' +
+        '<button class="btn primary" id="btnAgain">再来一组</button>' +
+        '<button class="btn ghost" id="btnBack">回看上一张</button>' +
+        '<button class="btn ghost" id="btnHome">回到首页</button>' +
+      '</div>' +
+    '</div>';
+  ctx = null;
+  $('#btnAgain').onclick = function(){
+    const q = buildQueue();
+    startSession(q.length ? q : buildPractice());
+  };
+  $('#btnBack').onclick = function(){
+    if(!session || !session.q.length) return;
+    session.i = session.q.length - 1;
+    renderCard();
+  };
+  $('#btnHome').onclick = function(){ go('home'); };
+}
+
+/* ---------- 收藏 ---------- */
+function toggleStar(w){
+  let rec = state.words[w];
+  if(!rec){ rec = state.words[w] = {b:0, seen:0, ok:0, bad:0, star:false, first:Date.now(), due: Date.now() + 3650*DAY}; }
+  rec.star = !rec.star;
+  save();
+  toast(rec.star ? '已加入收藏' : '已取消收藏');
+}
+
+/* ---------- 词库页 ---------- */
+let wFilter = 'all';
+function statusOf(rec){
+  if(!rec || !rec.seen) return {t:'未学', c:''};
+  if(rec.b >= 5) return {t:'已掌握', c:'s2'};
+  return {t:'学习中', c:'s1'};
+}
+function renderWordsList(){
+  const q = ($('#wordSearch').value || '').trim().toLowerCase();
+  const cat = $('#wordCat').value;
+  const host = $('#wordList');
+  const rows = ALL.filter(function(x){
+    if(cat !== '__all' && x.cat !== cat) return false;
+    if(q && x.w.toLowerCase().indexOf(q) < 0 && x.mean.toLowerCase().indexOf(q) < 0) return false;
+    const rec = state.words[x.w];
+    if(wFilter === 'new') return !rec || !rec.seen;
+    if(wFilter === 'learning') return rec && rec.seen && rec.b < 5;
+    if(wFilter === 'mastered') return rec && rec.b >= 5;
+    if(wFilter === 'star') return rec && rec.star;
+    if(wFilter === 'bad') return rec && rec.bad > 0;
+    return true;
+  });
+  if(!rows.length){ host.innerHTML = '<div class="empty-tip">没有符合条件的单词</div>'; return; }
+  let html = '';
+  rows.forEach(function(x){
+    const rec = state.words[x.w];
+    const st = statusOf(rec);
+    html += '<div class="wrow" data-w="' + esc(x.w) + '">' +
+        '<div class="w">' + (rec && rec.star ? '<span class="wstar">★</span>' : '') + esc(x.w) + '</div>' +
+        '<div class="m">' + esc(x.mean) + '</div>' +
+        '<div class="st ' + st.c + '">' + st.t + '</div>' +
+        '<button class="star' + (rec && rec.star ? ' on' : '') + '" data-star="' + esc(x.w) + '" title="收藏">' + STAR + '</button>' +
+      '</div>' +
+      '<div class="wexp" hidden style="padding:4px 4px 12px;border-bottom:1px solid var(--line)">' +
+        '<div class="muted" style="margin-bottom:4px">' + esc(x.ph) + ' · ' + esc(x.cat) +
+          ' <button class="link" data-speak="' + esc(x.w) + '">朗读</button></div>' +
+        (x.ex ? '<div style="font-size:13.5px">' + esc(x.ex) + '</div><div class="muted" style="font-size:12.5px">' + esc(x.exZh) + '</div>' : '<div class="muted">（该词暂无例句）</div>') +
+        mnHtml(x) +
+      '</div>';
+  });
+  host.innerHTML = html;
+  $('#wordList').dataset.count = rows.length;
+}
+function bindWords(){
+  const sel = $('#wordCat');
+  const cats = [];
+  ALL.forEach(function(x){ if(cats.indexOf(x.cat) < 0) cats.push(x.cat); });
+  sel.innerHTML = '<option value="__all">全部分类</option>' + cats.map(function(c){
+    return '<option value="' + esc(c) + '">' + esc(c) + '</option>';
+  }).join('');
+  $('#wordSearch').addEventListener('input', function(){ renderWordsList(); });
+  sel.addEventListener('change', function(){ renderWordsList(); });
+  $('#wordChips').addEventListener('click', function(e){
+    const b = e.target.closest('.chip');
+    if(!b) return;
+    wFilter = b.dataset.f;
+    $$('#wordChips .chip').forEach(function(c){ c.classList.toggle('active', c === b); });
+    renderWordsList();
+  });
+  $('#wordList').addEventListener('click', function(e){
+    const sp = e.target.closest('[data-speak]');
+    if(sp){ e.stopPropagation(); speak(sp.dataset.speak); return; }
+    const st = e.target.closest('[data-star]');
+    if(st){ e.stopPropagation(); toggleStar(st.dataset.star); renderWordsList(); return; }
+    const row = e.target.closest('.wrow');
+    if(!row) return;
+    const exp = row.nextElementSibling;
+    if(exp && exp.classList.contains('wexp')) exp.hidden = !exp.hidden;
+  });
+}
+
+/* ---------- 统计页 ---------- */
+function renderStats(){
+  const s = snap();
+  const days = Object.keys(state.log).filter(function(k){ return (state.log[k]||{}).n > 0; }).length;
+  let learning = 0, fresh = 0;
+  for(const k in state.words){
+    const r = state.words[k];
+    if(r && r.seen && r.b < 5) learning++;
+  }
+  fresh = s.totalWords - s.learned;
+
+  let heat = '';
+  for(let i=34;i>=0;i--){
+    const d = dayShift(i);
+    const k = todayKey(d);
+    const v = (state.log[k] || {}).n || 0;
+    const lv = v === 0 ? '' : v < 10 ? 'l1' : v < 25 ? 'l2' : v < 50 ? 'l3' : 'l4';
+    heat += '<i class="' + lv + '" title="' + k + '：' + v + ' 词"></i>';
+  }
+
+  function barLine(label, val, max, color){
+    const p = max ? Math.round(val/max*100) : 0;
+    return '<div class="barline"><div class="bl"><span>' + label + '</span><span>' + val + ' 词</span></div>' +
+      '<div class="bt"><i style="width:' + p + '%' + (color ? ';background:' + color : '') + '"></i></div></div>';
+  }
+
+  $('#view-stats').innerHTML =
+    '<div class="stat-grid">' +
+      '<div class="tile"><div class="k">累计学习</div><div class="v">' + s.learned + '<small>词</small></div></div>' +
+      '<div class="tile"><div class="k">已掌握</div><div class="v">' + s.mastered + '<small>词</small></div></div>' +
+      '<div class="tile"><div class="k">连续打卡</div><div class="v">' + s.streak + '<small>天</small></div></div>' +
+      '<div class="tile"><div class="k">学习天数</div><div class="v">' + days + '<small>天</small></div></div>' +
+      '<div class="tile"><div class="k">今日正确率</div><div class="v">' + s.acc + '<small>%</small></div></div>' +
+      '<div class="tile"><div class="k">待复习</div><div class="v">' + s.due + '<small>词</small></div></div>' +
+    '</div>' +
+    '<div class="card pad">' +
+      '<h3>词库掌握情况</h3>' +
+      barLine('已掌握（复习 5 轮以上）', s.mastered, s.totalWords, 'linear-gradient(90deg,#11a05e,#3ad29a)') +
+      barLine('学习中', learning, s.totalWords, 'linear-gradient(90deg,#d98600,#f5b843)') +
+      barLine('尚未学习', Math.max(0, fresh), s.totalWords, '') +
+    '</div>' +
+    '<div class="card pad">' +
+      '<div class="row between"><h3 style="margin:0">打卡热力图</h3><span class="muted">最近 35 天</span></div>' +
+      '<div class="heat">' + heat + '</div>' +
+    '</div>' +
+    '<div class="card pad">' +
+      '<h3>复习节奏说明</h3>' +
+      '<p class="muted" style="line-height:1.9">答「认识」→ 进入下一档间隔：1 天 → 2 天 → 4 天 → 7 天 → 15 天 → 30 天 → 60 天，连续 5 轮以上记为已掌握。<br>' +
+      '答「模糊」→ 间隔按当前档位的六折安排，很快会再见。<br>' +
+      '答「不认识」→ 归零重来，并在本组末尾再出现一次。</p>' +
+    '</div>';
+}
+
+/* ---------- 设置 ---------- */
+function syncSettings(){
+  $('#setDaily').value = state.settings.dailyNew;
+  $('#setDailyVal').textContent = state.settings.dailyNew;
+  $('#setMode').value = state.settings.mode;
+  $('#setAccent').value = state.settings.accent;
+  $('#setAuto').checked = !!state.settings.autoSpeak;
+  $('#setMn').checked = state.settings.showMn !== false;
+  $('#setTheme').value = state.settings.theme;
+  $('#bankCount').textContent = ALL.length;
+}
+function bindSettings(){
+  $('#setDaily').addEventListener('input', function(){
+    state.settings.dailyNew = parseInt(this.value, 10);
+    $('#setDailyVal').textContent = this.value;
+    save();
+  });
+  $('#setMode').addEventListener('change', function(){ state.settings.mode = this.value; save(); });
+  $('#setAccent').addEventListener('change', function(){ state.settings.accent = this.value; save(); speak('specimen'); });
+  $('#setAuto').addEventListener('change', function(){ state.settings.autoSpeak = this.checked; save(); });
+  $('#setMn').addEventListener('change', function(){
+    state.settings.showMn = this.checked;
+    save();
+    toast(this.checked ? '已开启助记' : '已关闭助记');
+  });
+  $('#setTheme').addEventListener('change', function(){ state.settings.theme = this.value; applyTheme(); save(); });
+  $('#btnTestSpeak').onclick = function(){ speak('specimen'); };
+
+  $('#btnImport').onclick = function(){
+    const text = $('#importBox').value || '';
+    const list = parseImport(text);
+    if(!list.length){ toast('没有识别到有效的单词，请检查格式'); return; }
+    const seen = {};
+    ALL.forEach(function(x){ seen[x.w] = 1; });
+    let added = 0;
+    list.forEach(function(x){
+      if(seen[x.w]) return;
+      seen[x.w] = 1;
+      state.custom.push(x);
+      added++;
+    });
+    save();
+    rebuildAll();
+    $('#bankCount').textContent = ALL.length;
+    $('#importBox').value = '';
+    $('#wordCat').innerHTML = '<option value="__all">全部分类</option>' +
+      (function(){ const cs=[]; ALL.forEach(function(x){ if(cs.indexOf(x.cat)<0) cs.push(x.cat); });
+        return cs.map(function(c){ return '<option value="' + esc(c) + '">' + esc(c) + '</option>'; }).join(''); })();
+    renderWordsList();
+    toast('成功导入 ' + added + ' 个单词' + (added < list.length ? '（' + (list.length-added) + ' 个重复已跳过）' : ''));
+  };
+  $('#btnExport').onclick = function(){
+    download('托业背单词-进度备份-' + todayKey() + '.json', JSON.stringify(state), 'application/json;charset=utf-8');
+    toast('进度备份已导出');
+  };
+  $('#btnExportWords').onclick = function(){
+    const txt = ALL.map(function(x){
+      return [x.w, x.ph, x.mean, x.ex, x.exZh, x.mn || ''].join('|');
+    }).join('\n');
+    download('托业词表-' + ALL.length + '词.txt', txt, 'text/plain;charset=utf-8');
+    toast('词表已导出');
+  };
+  $('#btnReset').onclick = function(){
+    if(!confirm('确定要清空全部学习进度吗？此操作不可恢复（词库会保留）。')) return;
+    state.words = {};
+    state.log = {};
+    save();
+    toast('学习进度已清空');
+    syncSettings();
+    go('home');
+  };
+}
+function parseImport(text){
+  const out = [];
+  text.split(/\r?\n/).forEach(function(raw){
+    const s = raw.trim();
+    if(!s) return;
+    let w = '', ph = '', mean = '', ex = '', exZh = '', mn = '';
+    if(s.indexOf('|') >= 0){
+      const p = s.split('|').map(function(x){ return x.trim(); });
+      w = p[0]; ph = p[1] || ''; mean = p[2] || ''; ex = p[3] || ''; exZh = p[4] || ''; mn = p[5] || '';
+    } else if(s.indexOf('\t') >= 0){
+      const p = s.split('\t').map(function(x){ return x.trim(); });
+      w = p[0]; mean = p[1] || ''; ph = p[2] || '';
+    } else {
+      let m = s.match(/^([A-Za-z][A-Za-z\-'’ ]*?)[\s,，:：]+(.+)$/);
+      if(!m) return;
+      w = m[1].trim(); mean = m[2].trim();
+    }
+    if(!w || !mean) return;
+    if(!/^[A-Za-z][A-Za-z\-'’ .]*$/.test(w)) return;
+    if(w.length > 40) return;
+    out.push({w:w, ph:ph, mean:mean, ex:ex, exZh:exZh, cat:'自定义', mn:mn});
+  });
+  return out;
+}
+function download(name, text, type){
+  const blob = new Blob([text], {type: type || 'application/octet-stream'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 3000);
+}
+
+/* ---------- 版本与更新 ---------- */
+const APP_VERSION = (function(){
+  const m = document.querySelector('meta[name="app-version"]');
+  return m ? m.content : '0.0.0';
+})();
+function verNum(v){ return String(v).split('.').map(function(x){ return parseInt(x, 10) || 0; }); }
+function verCmp(a, b){
+  const A = verNum(a), B = verNum(b);
+  for(let i = 0; i < 3; i++){
+    const x = A[i] || 0, y = B[i] || 0;
+    if(x !== y) return x > y ? 1 : -1;
+  }
+  return 0;
+}
+function reloadFresh(){
+  try{
+    const u = new URL(location.href);
+    u.searchParams.set('_t', Date.now());
+    location.replace(u.toString());
+  }catch(e){ location.reload(); }
+}
+function showUpdate(remote){
+  const bar = $('#updBar');
+  if(!bar) return;
+  $('#updVer').textContent = 'v' + remote;
+  $('#updCur').textContent = 'v' + APP_VERSION;
+  bar.hidden = false;
+}
+async function checkUpdate(manual){
+  const hint = $('#updHint');
+  if(location.protocol === 'file:'){
+    if(manual) toast('本地文件打开时无法检查更新，发布成网址后才行');
+    if(hint) hint.textContent = '当前是本地文件模式';
+    return;
+  }
+  try{
+    const u = new URL(location.href);
+    u.searchParams.set('_t', Date.now());
+    const res = await fetch(u.toString(), {cache: 'no-store'});
+    const text = await res.text();
+    const m = text.match(/<meta name="app-version" content="([^"]+)">/);
+    if(!m){ if(manual) toast('没有读到远端版本号'); return; }
+    const remote = m[1];
+    if(hint) hint.textContent = '上次检查：' + new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'});
+    if(verCmp(remote, APP_VERSION) > 0){
+      showUpdate(remote);
+      if(manual) toast('发现新版本 v' + remote + '，刷新即可');
+    } else if(manual){
+      toast('已是最新版本 v' + APP_VERSION);
+    }
+  }catch(e){
+    if(manual) toast('检查更新失败，请检查网络连接');
+  }
+}
+function bindUpdate(){
+  const cur = 'v' + APP_VERSION;
+  if($('#sideVer')) $('#sideVer').textContent = cur;
+  if($('#setVer')) $('#setVer').textContent = cur;
+  if($('#btnCheckUpdate')) $('#btnCheckUpdate').onclick = function(){ checkUpdate(true); };
+  if($('#btnReload')) $('#btnReload').onclick = reloadFresh;
+  if($('#btnUpdClose')) $('#btnUpdClose').onclick = function(){ $('#updBar').hidden = true; };
+  setTimeout(function(){ checkUpdate(false); }, 1500);
+}
+
+/* ---------- 全局交互 ---------- */
+function bindGlobal(){
+  $('#nav').addEventListener('click', function(e){
+    const b = e.target.closest('.nav-item');
+    if(!b) return;
+    if(b.dataset.view === 'study' && session){ go('study'); return; }
+    go(b.dataset.view);
+  });
+  $('#btnTheme').onclick = function(){
+    state.settings.theme = state.settings.theme === 'dark' ? 'light' : 'dark';
+    applyTheme(); save();
+    if(currentView === 'home') renderHome();
+    if(currentView === 'stats') renderStats();
+  };
+  document.addEventListener('click', function(e){
+    const s = e.target.closest('[data-speak]');
+    if(s) speak(s.dataset.speak);
+  });
+  document.addEventListener('keydown', function(e){
+    const tag = (e.target.tagName || '').toLowerCase();
+    if(tag === 'input' || tag === 'textarea' || tag === 'select') return;
+    if(currentView !== 'study' || !session) return;
+    if(e.key === 'ArrowLeft'){ e.preventDefault(); goPrev(); return; }
+    if(e.key === 'ArrowRight'){ e.preventDefault(); goNext(); return; }
+    if(!ctx) return;
+    if(e.code === 'Space'){
+      e.preventDefault();
+      if(ctx.mode === 'card' && !ctx.flipped) flipCard();
+      return;
+    }
+    if(ctx.answered && e.key === 'Enter'){
+      e.preventDefault();
+      if(ctx.pendingGrade !== undefined && !ctx.done) answer(ctx.pendingGrade);
+      return;
+    }
+    if(ctx.mode === 'card' && ctx.flipped && (e.key === '1' || e.key === '2' || e.key === '3')){
+      e.preventDefault();
+      answer(parseInt(e.key, 10) - 1);
+      return;
+    }
+    if(e.key === 's' || e.key === 'S'){
+      const cur = session.q[session.i];
+      if(cur) speak(cur.item.w);
+    }
+  });
+}
+
+/* ---------- 启动 ---------- */
+rebuildAll();
+applyTheme();
+bindGlobal();
+bindSettings();
+bindWords();
+bindUpdate();
+renderHome();
+$('#sideStreak').textContent = streak();
+})();
+</script>
+</body>
+</html>
