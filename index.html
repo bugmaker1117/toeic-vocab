@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>托业背单词 · TOEIC Vocab</title>
 <!-- 发版只需改下面这行的 content，页面里所有版本号与更新检测都读它 -->
-<meta name="app-version" content="1.2.0">
+<meta name="app-version" content="1.3.0">
 <meta name="app-name" content="托业背单词">
 <style>
 *{box-sizing:border-box}
@@ -194,6 +194,35 @@ input,select,textarea{font-family:inherit;font-size:14px;color:var(--text)}
 .fc-mean{font-size:17px;font-weight:600;margin-bottom:10px;line-height:1.55}
 .fc-ex p{font-size:14px;line-height:1.65;color:var(--text);margin-bottom:2px}
 .fc-ex .exzh{font-size:13px;color:var(--muted)}
+/* 义项 + 例句 */
+.senses{display:flex;flex-direction:column}
+.sense{padding:9px 0;border-bottom:1px dashed var(--line)}
+.sense:first-child{padding-top:0}
+.sense:last-child{border-bottom:0;padding-bottom:0}
+.sense-h{font-size:14.5px;font-weight:650;color:var(--text);margin-bottom:4px;line-height:1.5}
+.sense-h b{color:var(--accent);font-weight:700;margin-right:6px;font-size:13px}
+.sense-ex{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:14px;line-height:1.62;color:var(--text);
+}
+.sense-zh{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.55}
+/* 经典引文 */
+.quote{
+  margin-top:12px;padding:11px 14px;border-radius:11px;
+  background:var(--accent-soft);border-left:3px solid var(--accent2);
+}
+.q-tag{
+  display:inline-block;font-size:10px;font-weight:700;letter-spacing:.8px;
+  color:var(--accent);background:var(--panel);border-radius:5px;padding:1px 6px;margin-bottom:6px;
+}
+.q-en{font-family:Georgia,"Times New Roman",serif;font-size:13.5px;line-height:1.62;color:var(--text)}
+.q-zh{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.55}
+.q-src{font-size:11.5px;color:var(--accent);margin-top:6px;opacity:.92}
+.fb-word{font-size:15px;margin-bottom:9px}
+.fb .senses{margin-top:2px}
+.fb .sense{padding:7px 0}
+.fb .sense-h{font-size:13.5px}
+.fb .sense-ex{font-size:13px}
 .fc-mn{
   margin-top:13px;padding:10px 13px;border-radius:11px;background:var(--mn-soft);
   border:1px solid var(--mn-line);font-size:13px;line-height:1.65;color:var(--text);
@@ -472,7 +501,7 @@ textarea#importBox:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--a
     <div class="side-foot">
       <div class="streak"><b id="sideStreak">0</b> 天连续打卡</div>
       <div class="side-note">进度保存在本机浏览器</div>
-      <div class="verline" id="sideVer">v1.2.0</div>
+      <div class="verline" id="sideVer">v1.3.0</div>
     </div>
   </aside>
 
@@ -587,7 +616,7 @@ textarea#importBox:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--a
         <h3>版本与更新</h3>
         <div class="field">
           <div>
-            <label>当前版本 <span id="setVer" style="color:var(--accent);font-weight:600">v1.2.0</span></label>
+            <label>当前版本 <span id="setVer" style="color:var(--accent);font-weight:600">v1.3.0</span></label>
             <span class="hint" id="updHint">打开页面时会自动检查一次更新</span>
           </div>
           <button class="btn sm" id="btnCheckUpdate">检查更新</button>
@@ -845,6 +874,7 @@ exceed|/ɪkˈsiːd/|v. 超过|Do not exceed the monthly limit.|不要超过每�
 facilitate|/fəˈsɪlɪteɪt/|v. 促进，使便利|The new software facilitates teamwork.|新软件促进了团队协作。
 frequent|/ˈfriːkwənt/|adj. 频繁的|Frequent flyers receive extra benefits.|常旅客可获得额外福利。
 maintain|/meɪnˈteɪn/|v. 维持，保养|We maintain high standards of service.|我们保持高标准的服务。
+provide|/prəˈvaɪd/|v. 提供|The vendor will provide on-site training.|供应商将提供现场培训。
 reduce|/rɪˈduːs/|v. 减少|The company reduced waste by 30 percent.|公司减少了30%的浪费。
 sufficient|/səˈfɪʃnt/|adj. 充足的|We have sufficient stock for the season.|这个旺季我们有充足的库存。
 ##商务扩展
@@ -1039,6 +1069,7 @@ const MNEM = {
 "asset":"as(到)+set(坐) → 坐得住的底子 → 资产",
 "liability":"li(捆)+ability → 被捆住的责任 → 负债",
 "profit":"pro(向前)+fit(做) → 做出来的好处 → 利润",
+"provide":"pro(向前)+vide(看，同 video) → 先看到需求 → 提前提供",
 "reimburse":"re(回)+im(进)+burse(钱包) → 钱回到钱包 → 报销",
 "accountant":"account(账户)+ant(人) → 管账的人",
 "transaction":"trans(跨越)+act(做) → 一手交钱一手交货 → 交易",
@@ -1321,6 +1352,55 @@ const MNEM = {
 "willing":"will(意愿)+ing → 愿意的"
 };
 
+/* ================= 多义词：每个义项一句例句 ================= */
+const SENSE = {
+"objective":[["n.","目标","Our main objective is to raise sales by 20 percent.","我们的主要目标是把销售额提高20%。"],["adj.","客观的","A good report stays objective about both the gains and the losses.","好的报告对收益和亏损都保持客观。"]],
+"brief":[["adj.","简短的","The director gave a brief update on the merger.","总监简要介绍了并购的最新情况。"],["v.","简要介绍","She briefed the new staff on safety rules before the tour.","参观前她向新员工简要交代了安全规定。"]],
+"archive":[["v.","归档","We archive old contracts in the basement.","我们把旧合同归档在地下室。"],["n.","档案，档案馆","The 1998 records are kept in the company archive.","1998年的记录存放在公司档案室。"]],
+"schedule":[["v.","安排","The interview is scheduled for Monday morning.","面试安排在周一上午。"],["n.","日程，时间表","The delivery schedule has been moved up by two days.","交货日程提前了两天。"]],
+"invoice":[["n.","发票","Please send the invoice to our accounting department.","请把发票发给我们的财务部门。"],["v.","开发票","Clients are invoiced at the end of each month.","每月月末给客户开票。"]],
+"deposit":[["n.","押金，存款","A deposit of 20 percent is required.","需要支付20%的押金。"],["v.","存入","She deposits half of her bonus into a savings account.","她把一半奖金存入储蓄账户。"]],
+"estimate":[["v.","估计","We estimate the cost at two million dollars.","我们估计成本为两百万美元。"],["n.","估算，估价单","The repair estimate came in higher than expected.","维修报价比预期更高。"]],
+"appreciate":[["v.","升值","The yen appreciated against the dollar.","日元对美元升值。"],["v.","感激，感谢","We appreciate your patience during the system upgrade.","感谢您在系统升级期间的耐心。"]],
+"promote":[["v.","晋升","He was promoted to regional manager.","他被晋升为区域经理。"],["v.","推广，宣传","The campaign is designed to promote the new brand.","这次活动旨在推广新品牌。"]],
+"dismiss":[["v.","解雇","He was dismissed for repeated lateness.","他因屡次迟到被解雇。"],["v.","驳回，不予理会","The court dismissed the claim for lack of evidence.","法院因证据不足驳回了该诉求。"]],
+"promotion":[["n.","促销","The store is running a promotion this weekend.","这家店本周末有促销活动。"],["n.","晋升","She earned a promotion after leading the project.","她因主导该项目而获得晋升。"]],
+"sponsor":[["v.","赞助","The bank sponsors a local sports team.","该银行赞助了一支本地运动队。"],["n.","赞助商","Each sponsor receives two seats at the dinner.","每位赞助商在晚宴上获得两个席位。"]],
+"demographic":[["adj.","人口的","Demographic change is reshaping the labor market.","人口结构变化正在重塑劳动力市场。"],["n.","客户群，人群","The survey covers a wide demographic.","这项调查覆盖了广泛的人群。"]],
+"bargain":[["n.","便宜货","This model is a real bargain.","这款机型真是划算。"],["v.","讨价还价","Buyers often bargain over the final price.","买家常常就最终价格讨价还价。"]],
+"alternative":[["n.","替代方案","We need an alternative to the current plan.","我们需要一个替代现有方案的选项。"],["adj.","备选的","The alternative route adds twenty minutes.","备选路线要多花二十分钟。"]],
+"decline":[["v.","下降","Sales declined slightly in January.","一月的销售额略有下降。"],["v.","拒绝","She declined the offer politely but firmly.","她礼貌而坚定地拒绝了对方的提议。"]],
+"accommodate":[["v.","容纳","The hall can accommodate 300 guests.","大厅可容纳300位客人。"],["v.","为……提供住宿","The hotel can accommodate the whole team for a week.","这家酒店能为整个团队提供一周住宿。"]],
+"acknowledge":[["v.","确认收到","Please acknowledge receipt of this letter.","请确认收到此信。"],["v.","承认，认可","The company acknowledged the delay in its statement.","公司在声明中承认了这次延误。"]],
+"commission":[["n.","佣金","Sales staff earn a 5 percent commission.","销售人员可获得5%的佣金。"],["n.","委员会","The safety commission will publish its report in May.","安全委员会将在五月发布报告。"]],
+"draft":[["n.","草稿","Please review the first draft of the contract.","请审阅合同初稿。"],["v.","起草","Legal will draft the agreement by Friday.","法务部将在周五前起草协议。"]],
+"exhibit":[["v.","展出","Local artists will exhibit their work.","当地艺术家将展出他们的作品。"],["n.","展品","The most valuable exhibit is a bronze mirror.","最贵重的展品是一面铜镜。"]],
+"policy":[["n.","政策","The company updated its privacy policy.","公司更新了隐私政策。"],["n.","保险单","Her travel policy covers delays and lost luggage.","她的旅行保险涵盖延误和行李丢失。"]],
+"premium":[["n.","保险费","The annual premium rose by eight percent.","年保费上涨了8%。"],["adj.","优质的，高级的","Premium members get priority seating.","高级会员享有优先座位。"]],
+"turnover":[["n.","营业额","Annual turnover reached 50 million.","年营业额达到5000万。"],["n.","人员流动率","High turnover makes training costs hard to recover.","人员流动率高，培训成本难以收回。"]],
+"domestic":[["adj.","国内的","Domestic sales grew faster than exports.","国内销售增长快于出口。"],["adj.","家庭的","She balanced a demanding career with domestic responsibilities.","她在繁忙的事业与家庭责任之间取得平衡。"]],
+"minimum":[["adj.","最低的","The minimum order is fifty units.","最低订货量是五十台。"],["n.","最低限度","Orders have a minimum of 50 units.","订单最低50台。"]],
+"potential":[["adj.","潜在的","We are looking for potential partners.","我们正在寻找潜在合作伙伴。"],["n.","潜力","The new hire shows real potential.","这位新员工展现出真正的潜力。"]],
+"prompt":[["adj.","迅速的，及时的","Thank you for your prompt reply.","感谢您的及时回复。"],["v.","促使，引起","The recall prompted a review of safety tests.","这次召回促使对安全测试进行复查。"]]
+};
+
+/* ================= 经典引文（可考出处） ================= */
+const QUOTE = {
+"acknowledge":["It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.","有钱的单身汉总想娶位太太，这已成了一条举世公认的真理。","简·奥斯汀《傲慢与偏见》1813"],
+"establish":["We the People of the United States, in Order to form a more perfect Union, establish Justice, insure domestic Tranquility…","我们合众国人民，为组建更完善的联邦、树立正义、保障国内安宁……","《美国宪法》序言 1787"],
+"provide":["…provide for the common defence, promote the general Welfare, and secure the Blessings of Liberty to ourselves and our Posterity…","……提供共同防务、促进公共福利，并为我们自己和后代确保自由的福祉……","《美国宪法》序言 1787"],
+"promote":["…to promote the general Welfare, and secure the Blessings of Liberty to ourselves and our Posterity…","……以促进公共福利，并为我们自己和后代确保自由的福祉……","《美国宪法》序言 1787"],
+"negotiate":["Let us never negotiate out of fear. But let us never fear to negotiate.","让我们永远不要因为恐惧而谈判，但也永远不要害怕谈判。","约翰·肯尼迪 就职演说 1961"],
+"resolve":["…that we here highly resolve that these dead shall not have died in vain…","……我们在此下定决心，不让这些死者白白牺牲……","林肯 葛底斯堡演说 1863"],
+"enterprise":["And enterprises of great pith and moment, with this regard their currents turn awry, and lose the name of action.","而那些关乎重大时刻的宏图伟业，也因此偏离了航向，失去了行动的名分。","莎士比亚《哈姆雷特》第三幕第一场"],
+"deliver":["And lead us not into temptation, but deliver us from evil.","不叫我们遇见试探，救我们脱离凶恶。","《圣经·马太福音》6:13 钦定本"],
+"profit":["For what shall it profit a man, if he shall gain the whole world, and lose his own soul?","人若赚得全世界，却赔上自己的灵魂，有什么益处呢？","《圣经·马可福音》8:36 钦定本"],
+"wage":["For the wages of sin is death.","罪的工价乃是死。","《圣经·罗马书》6:23 钦定本"],
+"sufficient":["Sufficient unto the day is the evil thereof.","一天的难处一天当就够了。","《圣经·马太福音》6:34 钦定本"],
+"exceed":["Except your righteousness shall exceed the righteousness of the scribes and Pharisees, ye shall in no case enter into the kingdom of heaven.","你们的义若不胜过文士和法利赛人的义，断不能进天国。","《圣经·马太福音》5:20 钦定本"],
+"cease":["Rejoice evermore. Pray without ceasing. In every thing give thanks.","要常常喜乐，不住地祷告，凡事谢恩。","《圣经·帖撒罗尼迦前书》5:16-18 钦定本"]
+};
+
 /* ---------- 状态 ---------- */
 function load(){
   let s = null;
@@ -1344,12 +1424,12 @@ function rebuildAll(){
   const seen = {};
   BANK.forEach(function(x){
     seen[x.w] = 1;
-    base.push({w:x.w, ph:x.ph, mean:x.mean, ex:x.ex, exZh:x.exZh, cat:x.cat, mn: MNEM[x.w] || ''});
+    base.push({w:x.w, ph:x.ph, mean:x.mean, ex:x.ex, exZh:x.exZh, cat:x.cat, mn: MNEM[x.w] || '', sn: SENSE[x.w] || null, qt: QUOTE[x.w] || null});
   });
   state.custom.forEach(function(x){
     if(!x || !x.w || seen[x.w]) return;
     seen[x.w] = 1;
-    base.push({w:x.w, ph:x.ph||'', mean:x.mean||'', ex:x.ex||'', exZh:x.exZh||'', cat:x.cat||'自定义', mn:x.mn || MNEM[x.w] || ''});
+    base.push({w:x.w, ph:x.ph||'', mean:x.mean||'', ex:x.ex||'', exZh:x.exZh||'', cat:x.cat||'自定义', mn:x.mn || MNEM[x.w] || '', sn: x.sn || SENSE[x.w] || null, qt: QUOTE[x.w] || null});
   });
   ALL = base;
   for(const k in IDX) delete IDX[k];
@@ -1365,6 +1445,31 @@ function esc(s){
 function mnHtml(it, cls){
   if(!it || !it.mn || !state.settings.showMn) return '';
   return '<div class="fc-mn' + (cls ? ' ' + cls : '') + '"><span class="mn-tag">助记</span>' + esc(it.mn) + '</div>';
+}
+/* 释义 + 每个义项一句例句 */
+function senseHtml(it){
+  if(!it) return '';
+  const list = (it.sn && it.sn.length) ? it.sn : [[null, it.mean, it.ex, it.exZh]];
+  let h = '<div class="senses">';
+  list.forEach(function(s){
+    const pos = s[0], cn = s[1], ex = s[2], zh = s[3];
+    h += '<div class="sense">' +
+      '<div class="sense-h">' + (pos ? '<b>' + esc(pos) + '</b>' : '') + esc(cn || '') + '</div>' +
+      (ex ? '<div class="sense-ex">' + esc(ex) + '</div>' : '') +
+      (zh ? '<div class="sense-zh">' + esc(zh) + '</div>' : '') +
+    '</div>';
+  });
+  return h + '</div>';
+}
+/* 经典引文 */
+function quoteHtml(it){
+  if(!it || !it.qt) return '';
+  return '<div class="quote">' +
+    '<span class="q-tag">经典</span>' +
+    '<p class="q-en">“' + esc(it.qt[0]) + '”</p>' +
+    '<p class="q-zh">' + esc(it.qt[1]) + '</p>' +
+    '<p class="q-src">— ' + esc(it.qt[2]) + '</p>' +
+  '</div>';
 }
 function todayKey(d){  const t = new Date((d || new Date()).getTime() - (d || new Date()).getTimezoneOffset()*60000);
   return t.toISOString().slice(0,10);
@@ -1645,9 +1750,9 @@ function renderCard(){
           '<div class="fc-ph"><span>' + esc(it.ph) + '</span><button class="ic" data-speak="' + esc(it.w) + '">' + SPK + '</button></div>' +
         '</div>' +
         '<div class="fc-back">' +
-          '<div class="fc-mean">' + esc(it.mean) + '</div>' +
+          senseHtml(it) +
+          quoteHtml(it) +
           mnHtml(it) +
-          (it.ex ? '<div class="fc-ex" style="margin-top:10px"><p>' + esc(it.ex) + '</p><p class="exzh">' + esc(it.exZh) + '</p></div>' : '') +
         '</div>' +
         '<div class="fc-hint">按 <kbd>空格</kbd> 显示释义</div>' +
       '</div>' +
@@ -1802,9 +1907,9 @@ function renderReviewCard(){
         '<div class="fc-ph"><span>' + esc(it.ph) + '</span><button class="ic" data-speak="' + esc(it.w) + '">' + SPK + '</button></div>' +
       '</div>' +
       '<div class="fc-back">' +
-        '<div class="fc-mean">' + esc(it.mean) + '</div>' +
+        senseHtml(it) +
+        quoteHtml(it) +
         mnHtml(it) +
-        (it.ex ? '<div class="fc-ex" style="margin-top:10px"><p>' + esc(it.ex) + '</p><p class="exzh">' + esc(it.exZh) + '</p></div>' : '') +
       '</div>' +
     '</div>' +
     verdict +
@@ -1838,8 +1943,9 @@ function showFb(ok, item){
   fb.className = 'fb ' + (ok ? 'ok' : 'no');
   fb.innerHTML =
     '<div class="fb-h">' + (ok ? '回答正确' : '正确答案') + '</div>' +
-    '<p><b>' + esc(item.w) + '</b> <span class="zh">' + esc(item.ph) + '</span> — ' + esc(item.mean) + '</p>' +
-    (item.ex ? '<p class="zh">' + esc(item.ex) + '</p><p class="zh">' + esc(item.exZh) + '</p>' : '') +
+    '<div class="fb-word"><b>' + esc(item.w) + '</b> <span class="zh">' + esc(item.ph) + '</span></div>' +
+    senseHtml(item) +
+    quoteHtml(item) +
     mnHtml(item) +
     '<div class="fb-actions"><button class="btn primary sm" id="btnNext">继续</button></div>';
   fb.hidden = false;
@@ -2007,7 +2113,8 @@ function renderWordsList(){
       '<div class="wexp" hidden style="padding:4px 4px 12px;border-bottom:1px solid var(--line)">' +
         '<div class="muted" style="margin-bottom:4px">' + esc(x.ph) + ' · ' + esc(x.cat) +
           ' <button class="link" data-speak="' + esc(x.w) + '">朗读</button></div>' +
-        (x.ex ? '<div style="font-size:13.5px">' + esc(x.ex) + '</div><div class="muted" style="font-size:12.5px">' + esc(x.exZh) + '</div>' : '<div class="muted">（该词暂无例句）</div>') +
+        senseHtml(x) +
+        quoteHtml(x) +
         mnHtml(x) +
       '</div>';
   });
