@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>托业背单词 · TOEIC Vocab</title>
 <!-- 发版只需改下面这行的 content，页面里所有版本号与更新检测都读它 -->
-<meta name="app-version" content="1.3.0">
+<meta name="app-version" content="1.4.0">
 <meta name="app-name" content="托业背单词">
 <style>
 *{box-sizing:border-box}
@@ -218,6 +218,26 @@ input,select,textarea{font-family:inherit;font-size:14px;color:var(--text)}
 .q-en{font-family:Georgia,"Times New Roman",serif;font-size:13.5px;line-height:1.62;color:var(--text)}
 .q-zh{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.55}
 .q-src{font-size:11.5px;color:var(--accent);margin-top:6px;opacity:.92}
+/* 例句可点词 + 释义浮层 */
+.wd{cursor:pointer;border-radius:3px;padding:0 1px;margin:0 -1px;transition:background .12s,color .12s}
+.wd:hover{background:var(--accent-soft);color:var(--accent)}
+.wdpop{
+  position:fixed;z-index:120;max-width:268px;background:var(--panel);
+  border:1px solid var(--line);border-radius:12px;padding:11px 13px;
+  box-shadow:0 14px 34px rgba(26,36,72,.18);font-size:13px;line-height:1.6;
+  pointer-events:none;animation:wdIn .14s ease;
+}
+.wdpop [data-speak]{pointer-events:auto}
+@keyframes wdIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.wdp-h{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px}
+.wdp-h b{font-size:15px;letter-spacing:-.2px}
+.wdp-ph{color:var(--muted);font-size:12px}
+.wdp-lem{color:var(--muted);font-size:11.5px;font-style:italic}
+.wdp-h .ic{width:21px;height:21px;flex:none}
+.wdp-h .ic svg{width:12px;height:12px}
+.wdp-t{color:var(--text)}
+.wdp-mn{margin-top:7px;padding:6px 8px;border-radius:7px;background:var(--mn-soft);color:var(--mn);font-size:12px;line-height:1.55}
+.wdp-tag{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.4px;color:var(--accent);background:var(--accent-soft);border-radius:5px;padding:1px 6px}
 .fb-word{font-size:15px;margin-bottom:9px}
 .fb .senses{margin-top:2px}
 .fb .sense{padding:7px 0}
@@ -501,7 +521,7 @@ textarea#importBox:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--a
     <div class="side-foot">
       <div class="streak"><b id="sideStreak">0</b> 天连续打卡</div>
       <div class="side-note">进度保存在本机浏览器</div>
-      <div class="verline" id="sideVer">v1.3.0</div>
+      <div class="verline" id="sideVer">v1.4.0</div>
     </div>
   </aside>
 
@@ -609,6 +629,7 @@ textarea#importBox:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--a
           <li><b>← / →</b> 回看上一个 / 往回翻</li>
           <li><b>Enter</b> 拼写题提交答案</li>
           <li><b>S</b> 朗读当前单词</li>
+          <li><b>点单词</b> 例句里点一下（或鼠标悬停）看释义</li>
         </ul>
       </div>
 
@@ -616,7 +637,7 @@ textarea#importBox:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--a
         <h3>版本与更新</h3>
         <div class="field">
           <div>
-            <label>当前版本 <span id="setVer" style="color:var(--accent);font-weight:600">v1.3.0</span></label>
+            <label>当前版本 <span id="setVer" style="color:var(--accent);font-weight:600">v1.4.0</span></label>
             <span class="hint" id="updHint">打开页面时会自动检查一次更新</span>
           </div>
           <button class="btn sm" id="btnCheckUpdate">检查更新</button>
@@ -637,6 +658,7 @@ textarea#importBox:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--a
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="wdpop" id="wdPop" hidden></div>
 
 <script>
 /* ================= 词库：托业高频词（按场景分类） ================= */
@@ -1401,6 +1423,724 @@ const QUOTE = {
 "cease":["Rejoice evermore. Pray without ceasing. In every thing give thanks.","要常常喜乐，不住地祷告，凡事谢恩。","《圣经·帖撒罗尼迦前书》5:16-18 钦定本"]
 };
 
+/* 例句词表：token → 释义 / [音标, 释义] / [音标, 释义, 原形]；词条整理自开放应试词表（TOEIC/BEC/CET/IELTS/TOEFL）并人工补充基础词 */
+const GLOSS = {
+"accomplished":["əˈkɑːmplɪʃ","v. 完成；实现","accomplish"],
+"account":"n. 客户；账户",
+"accountants":["əˈkaʊntənt","n. 会计人员；会计师","accountant"],
+"accounting":"n. 会计（部门）",
+"accurate":["ˈækjərət","adj. 精确的；准确的"],
+"acknowledged":["","v. 承认；确认收到","acknowledge"],
+"acquired":["əˈkwaɪər","v. 获得；得到","acquire"],
+"across":["ə'krɔs","横过；到对面"],
+"action":["ˈækʃən","行动；动作"],
+"actor":"n. 演员",
+"address":["əˈdrɛs;(for n)ˈædres; ædrɛs","地址；讲话"],
+"adds":["æd","增加；补充","add"],
+"adjourned":["əˈdʒɜːrn","v. 休会；延期","adjourn"],
+"adjusted":["əˈdʒʌst","v. 校准；调整","adjust"],
+"advance":"n. 预先（in advance 提前）；v. 前进",
+"advertises":["ˈædvərtaɪz","v. 公布；宣传","advertise"],
+"against":"prep. 相对于；反对；倚靠",
+"airport":"n. 机场",
+"allocated":["ˈæləkeɪt","v. 分配；拨出","allocate"],
+"amended":["əˈmend","v. 改善；改进","amend"],
+"amount":["əˈmaʊnt","v. 总计；合计"],
+"announced":["əˈnaʊns","v. 宣布；述说","announce"],
+"annual":"adj. 每年的，年度的",
+"answered":["","v./n. 回答","answer"],
+"app":"n. 应用程序",
+"appears":["ə'pɪr","出现；露出","appear"],
+"appliances":["əˈplaɪəns","n. 器具；器械","appliance"],
+"applicants":["","n. 申请人","applicant"],
+"applied":["","v. 申请；应用","apply"],
+"appointed":["əˈpɔɪnt","v. 任命；指定","appoint"],
+"appreciated":["","v. 升值；感激","appreciate"],
+"approval":["əˈpruːvl","n. 赞成；批准"],
+"approve":"v. 批准；赞成",
+"approved":["","v. 批准；赞成","approve"],
+"area":["ˈɛrɪə","n. 面积；区域"],
+"arranges":["əˈreɪndʒ","v. 排列；安排","arrange"],
+"arrived":["","v. 到达","arrive"],
+"article":["ˈɑrtɪkl","文章；物件"],
+"artists":["","n. 艺术家","artist"],
+"asia":"n. 亚洲",
+"ask":"v. 询问，请求",
+"asked":["","v. 询问，请求","ask"],
+"assigned":["əˈsaɪn","v. 分配；交给指派","assign"],
+"assistant":"n. 助理",
+"attach":["əˈtætʃ","v. 系；绑"],
+"attempted":["əˈtempt","v. 试图；尝试","attempt"],
+"attend":["əˈtend","v. 出席；上（大学等）"],
+"attended":["əˈtend","v. 出席；上（大学等）","attend"],
+"attendees":["ə'tɛn'di","出席者；在场者","attendee"],
+"automatically":"adv. 自动地",
+"awry":"adj./adv. 歪斜的；出错的（turn awry 偏离）",
+"balance":["ˈbæləns","n. 平衡；匀称"],
+"balanced":["ˈbæləns","n. 平衡；匀称","balance"],
+"bank":"n. 银行",
+"based":"v. 以……为基础（base 的过去式）",
+"basement":"n. 地下室",
+"become":"v. 变成，成为",
+"begins":["","v. 开始","begin"],
+"better":"adj. 好的；更好的",
+"beverages":["ˈbevərɪdʒ","n. 饮料","beverage"],
+"bids":["bɪd","v. 投标；出价","bid"],
+"blessings":["","n. 福祉，恩泽","blessing"],
+"board":"n. 董事会",
+"bonus":["ˈboʊnəs","n. 奖金；红利"],
+"bonuses":["ˈboʊnəs","n. 奖金；红利","bonus"],
+"boots":["but","靴子；长筒靴","boot"],
+"branch":"n. 分公司；分支机构",
+"branches":["","n. 分公司；分支机构","branch"],
+"breakfast":"n. 早餐",
+"briefed":["","v. 简要交代；adj. 简短的","brief"],
+"bring":"v. 带来",
+"bronze":["brɑnz","青铜；青铜色"],
+"building":"n. 建筑，大楼",
+"bulk":"n. 大量；批量（bulk orders 批量订单）",
+"business":["ˈbɪznəs","n. 商业；生意"],
+"buy":["baɪ","购买；交易"],
+"buyers":["","n. 买家，采购方","buyer"],
+"call":["kɔːl","v. 呼叫；拜访"],
+"calling":["kɔːl","v. 呼叫；拜访","call"],
+"came":["","v. 来","come"],
+"car":"n. 汽车",
+"career":["kəˈrɪr","n. 事业；职业"],
+"carefully":["","adj./adv. 仔细的（地）","careful"],
+"carrier":["ˈkærɪɚ","运输公司；运输工具"],
+"case":"n. 情况；案件；箱子",
+"cash":["kæʃ","n. 现款；现金"],
+"caused":["","v. 导致；n. 原因","cause"],
+"ceased":["sis","停止；终止","cease"],
+"ceasing":["sis","停止；终止","cease"],
+"central":"adj. 中心的，中央的",
+"chain":"n. 连锁店；链条",
+"change":"n. 变化；v. 改变",
+"changed":["","n. 变化；v. 改变","change"],
+"changes":["","n. 变化；v. 改变","change"],
+"charge":["tʃɑːrdʒ","n. 费用；掌管"],
+"chart":["tʃɑrt","图；图表"],
+"check":"v. 核对，检查；n. 支票",
+"chicago":"n. 芝加哥（美国城市）",
+"circulated":["ˈsɝkjəlet","循环；流通","circulate"],
+"cites":["saɪt","引用；引证","cite"],
+"city":"n. 城市；市政府",
+"claim":"v. 索赔；声称",
+"clean":"v. 清理；adj. 干净的",
+"clear":"adj. 清楚的；v. 清理",
+"clients":["ˈklaɪənt","n. 委托人顾客；常客","client"],
+"closed":["","v. 关闭；adj. 关闭的","close"],
+"coast":"n. 海岸",
+"colors":["","n. 颜色","color"],
+"comes":["","v. 来","come"],
+"comfortable":"adj. 舒适的",
+"common":["ˈkɑmən","adj. 共同的；普通的"],
+"commutes":["","v. 通勤","commute"],
+"company":"n. 公司",
+"competitive":["kəmˈpetətɪv","adj. 竞争的；比赛的(指人)好竞争的"],
+"complete":["kəm'plit","adj. 完整的；完全的完成的"],
+"completed":["kəm'plit","adj. 完整的；完全的完成的","complete"],
+"conference":"n. 会议",
+"confidentiality":[",kɑnfɪ,dɛnʃɪ'æləti","机密性"],
+"connects":["kəˈnekt","v. 连接；联合","connect"],
+"consists":["","v. 由……组成（consist of）","consist"],
+"consumers":["kənˈsuːmər","n. 用户；顾客","consumer"],
+"contact":"v. 联系；n. 联系人",
+"contains":["","v. 包含；容纳","contain"],
+"contract":"n. 合同",
+"contracts":["","n. 合同","contract"],
+"converted":["","v. 改建；转换","convert"],
+"cost":"n. 成本，费用",
+"costs":["","n. 成本，费用","cost"],
+"court":["kɔrt","法庭；法院"],
+"cover":"v. 涵盖，包括；承保",
+"covers":["","v. 涵盖，包括；承保","cover"],
+"create":["krɪ'et","创造；创作"],
+"created":["krɪ'et","创造；创作","create"],
+"current":"adj. 当前的；n. 水流，趋势",
+"currents":["","adj. 当前的；n. 水流，趋势","current"],
+"customer":"n. 顾客，客户",
+"customers":["","n. 顾客，客户","customer"],
+"damage":["ˈdæmɪdʒ","v. 损害；毁坏"],
+"data":"n. 数据，资料",
+"date":"n. 日期；v. 注明日期",
+"day":"n. 天，日；白天",
+"days":["","n. 天，日；白天","day"],
+"dead":"adj. 死去的；n. 死者",
+"deadlines":["","n. 截止日期","deadline"],
+"death":"n. 死亡",
+"decision":["dɪ'sɪʒn","n. 决定；决心"],
+"declare":["dɪ'klɛr","表态；宣布"],
+"declined":["","v. 下降；拒绝","decline"],
+"deducted":["dɪˈdʌkt","v. 扣除；减去","deduct"],
+"defence":["di'fens","防御；保护"],
+"delayed":["","n./v. 延误","delay"],
+"delays":["","n./v. 延误","delay"],
+"delivered":["dɪˈlɪvər","v. 发表；递送","deliver"],
+"delivers":["dɪˈlɪvər","v. 发表；递送","deliver"],
+"delivery":"n. 交付，送货",
+"demand":"n. 需求；v. 要求",
+"demanding":["dɪˈmændɪŋ","adj. 很费心的；很费力的"],
+"demonstrated":["ˈdemənstreɪt","v. 举行示威游行(或集会)；v. 说明","demonstrate"],
+"dentist":"n. 牙医",
+"department":"n. 部门",
+"departments":["","n. 部门","department"],
+"deposits":["dɪˈpɑːzɪt","n. 存款；保证金","deposit"],
+"design":"n. 设计；v. 设计",
+"designated":["ˈdezɪɡneɪt","v. 指派；委任标明","designate"],
+"designed":["","n. 设计；v. 设计","design"],
+"desk":"n. 办公桌；服务台",
+"detailed":["ˈdiːteɪld","adj. 详细的；精细的"],
+"died":["","v. 死亡","die"],
+"dinner":["ˈdɪnɚ","正餐；宴会"],
+"direct":["dəˈrɛkt; daɪˈrɛkt","直接地；直接的"],
+"director":"n. 总监，董事",
+"discounted":["ˈdɪskaʊnt","n. 数目；折扣","discount"],
+"discussed":["dɪ'skʌs","v. 讨论；论述","discuss"],
+"discussion":["dɪ'skʌʃən","n. 讨论；商讨"],
+"dismissed":["","v. 解雇；驳回","dismiss"],
+"dispute":["dɪˈspjuːt","v. 辩论；阻止"],
+"distribute":["dɪˈstrɪbjuːt","v. 分配；分给散发"],
+"documents":["","n. 文件","document"],
+"dollar":"n. 美元",
+"dollars":["","n. 美元","dollar"],
+"doors":["","n. 门","door"],
+"doubled":["","v. 翻倍；adj. 双的","double"],
+"drink":"v. 喝；n. 饮料",
+"driver":"n. 司机",
+"drop":["drɑːp","v. 滴；使降低"],
+"early":"adj./adv. 早的；提早",
+"earn":"v. 赚取，挣得",
+"earned":["","v. 赚取，挣得","earn"],
+"easier":"adj. 容易的",
+"elevator":["ˈelɪveɪtər","n. 电梯；升降舵"],
+"eliminates":["ɪ'lɪmɪnet","排除；消除","eliminate"],
+"email":"n. 电子邮件",
+"employees":["","n. 员工，雇员","employee"],
+"encrypted":"adj. 加密的",
+"end":"n. 末尾；v. 结束",
+"ended":["","n. 末尾；v. 结束","end"],
+"endorsed":["ɪnˈdɔːrs","v. 在(尤指支票的)背面签字；背书赞同","endorse"],
+"ends":["","n. 末尾；v. 结束","end"],
+"engineer":"n. 工程师",
+"engineers":["","n. 工程师","engineer"],
+"enhances":["ɪnˈhæns","v. 提高；增加","enhance"],
+"enjoy":"v. 享受，喜欢",
+"enrolled":["ɪnˈrəʊl","v. 【美】（使）加入；注册","enroll"],
+"enter":"v. 进入",
+"enterprises":["","n. 企业；事业","enterprise"],
+"error":["ˈɛrɚ","错误；差错"],
+"established":["ɪˈstæblɪʃ","建立；设立","establish"],
+"europe":"n. 欧洲",
+"event":["ɪˈvent","n. 事件；大事运动项目"],
+"evermore":"adv. 永远（古语）",
+"every":"adj. 每一个",
+"evidence":["ˈevɪdəns","n. 证据；证明"],
+"evil":"n. 邪恶；adj. 邪恶的",
+"excellent":"adj. 优秀的",
+"except":["ɪk'sɛpt","除…外；将…除外"],
+"excursions":["ɪkˈskɜːrʒn","n. 远足；短途旅行","excursion"],
+"expected":["","v. 预计；期待","expect"],
+"expenses":["ɪkˈspens","n. 开支；消费","expense"],
+"experience":"n. 经验；v. 经历",
+"expires":["ɪk'spaɪɚ","期满；终止","expire"],
+"exports":["","n. 出口（额）；v. 出口","export"],
+"extra":"adj. 额外的",
+"facilitates":["fəˈsɪlɪteɪt","v. 使便利；减轻…的困难","facilitate"],
+"factory":"n. 工厂",
+"failed":["fel","v. 在…中失败；v. 衰退","fail"],
+"failure":["ˈfeɪljər","n. 失败；故障"],
+"fair":["fer","adj. 公平的；美丽的"],
+"fall":"v. 落下；n. 秋天",
+"famous":"adj. 著名的",
+"faster":["","adj./adv. 快的（地）","fast"],
+"fear":"n./v. 恐惧，害怕",
+"fee":["fiː","n. 酬金；小费"],
+"fell":["","v. 落下；n. 秋天","fall"],
+"fifteenth":"num. 第十五",
+"fifty":"num. 五十",
+"figures":["","n. 数字；v. 认为","figure"],
+"filed":["","n. 文件；v. 归档","file"],
+"files":["","n. 文件；v. 归档","file"],
+"final":"adj. 最终的；n. 决赛",
+"finish":"v. 完成，结束",
+"firm":"n. 公司；adj. 坚定的",
+"firmly":"adv. 坚定地",
+"firms":["","n. 公司；adj. 坚定的","firm"],
+"flight":"n. 航班",
+"flights":["","n. 航班","flight"],
+"floor":"n. 楼层；地板",
+"flyers":["","n. 传单；常旅客（frequent flyer）","flyer"],
+"focuses":["","v. 集中；聚焦","focus"],
+"fog":["fɔɡ","雾；烟雾"],
+"follow":"v. 跟随；遵循",
+"form":"n. 表格；形式",
+"fortune":"n. 财富；运气",
+"forty":"num. 四十",
+"free":"adj. 免费的；自由的；有空的",
+"front":"n./adj. 前面；前面的（front desk 前台）",
+"fund":["fʌnd","n. 基金；专款现款"],
+"gain":"v. 获得；n. 收益",
+"gains":["","v. 获得；n. 收益","gain"],
+"gave":["","v. 给，提供","give"],
+"general":"adj. 普遍的；总的",
+"generated":["ˈdʒɛnəret","发生；引起","generate"],
+"get":"v. 得到；变得",
+"give":"v. 给，提供",
+"gives":["","v. 给，提供","give"],
+"goals":["ɡoʊl","n. 球门进球得的分努力的对象；目标","goal"],
+"good":"adj. 好的；更好的",
+"goods":"n. 货物，商品",
+"government":["ˈɡʌvɚnmənt","政府；管理"],
+"great":"adj. 极好的；重大的",
+"grew":["","v. 增长，成长","grow"],
+"group":"n. 集团；组",
+"growth":["ɡroʊθ","n. 生长；发育增加"],
+"guest":"n. 客人",
+"guests":["","n. 客人","guest"],
+"half":["hæf","一半地；部分地"],
+"hall":"n. 大厅",
+"halted":["hɔlt","停止；立定","halt"],
+"handles":["","v. 处理；n. 把手","handle"],
+"handling":["","v. 处理；n. 把手","handle"],
+"handouts":["","n. 讲义；宣传单","handout"],
+"hard":"adj./adv. 困难的；努力地",
+"harder":["","adj./adv. 困难的；努力地","hard"],
+"head":"n. 负责人；头部",
+"heads":["","n. 负责人；头部","head"],
+"health":"n. 健康；医疗",
+"heaven":["ˈhɛvən","天堂；天国"],
+"heavily":["ˈhɛvi","重的；沉重的","heavy"],
+"heavy":["ˈhɛvi","重的；沉重的"],
+"high":"adj. 高的",
+"higher":["","adj. 高的","high"],
+"highly":"adv. 非常，高度地",
+"hired":["","v. 聘用，雇用","hire"],
+"hires":["","v. 聘用，雇用","hire"],
+"holds":["hoʊld","v. 持有；保存","hold"],
+"holiday":"n. 假日，假期",
+"holidays":["","n. 假日，假期","holiday"],
+"home":["hom","在家；回家"],
+"hotel":"n. 酒店，旅馆",
+"hour":"n. 小时",
+"hours":["","n. 小时","hour"],
+"housing":["ˈhaʊzɪŋ","房屋；住宅"],
+"images":["","n. 图像；形象","image"],
+"improve":["ɪmˈpruːv","v. 改善；增进"],
+"improved":["ɪmˈpruːv","v. 改善；增进","improve"],
+"included":["ɪn'klud","v. 包含；包括","include"],
+"includes":["ɪn'klud","v. 包含；包括","include"],
+"increased":["","v./n. 增加","increase"],
+"indicates":["ˈɪndɪkeɪt","v. 标示；指示","indicate"],
+"ingredients":["ɪnˈɡriːdiənt","n. (混合物的)组成部分; 配料","ingredient"],
+"inquiries":["","n. 询问，咨询","inquiry"],
+"inspected":["","v. 检查，视察","inspect"],
+"inspector":["ɪn'spɛktɚ","巡视员；检查员"],
+"installments":["ɪn'stɔlmənt","分期付款","installment"],
+"instructions":["ɪn'strʌkʃən","命令；指示","instruction"],
+"insure":["ɪnˈʃʊr","v. 确保；保证"],
+"intern":"n. 实习生",
+"interview":"n. 面试；采访",
+"invested":["ɪnˈvest","v. 投资；耗费","invest"],
+"invoiced":["ˈɪnvɔɪs","n. 发票；发货单","invoice"],
+"issue":"n. 问题；v. 发放",
+"items":["","n. 物品；项目","item"],
+"job":"n. 工作，职位",
+"jobs":["","n. 工作，职位","job"],
+"justice":["ˈdʒʌstɪs","n. 正义；公正"],
+"keep":"v. 保留，保持",
+"kept":["","v. 保留，保持","keep"],
+"kingdom":["ˈkɪŋdəm","王国；领域"],
+"kitchen":"n. 厨房",
+"known":["no","v. 知道；认识","know"],
+"labels":["ˈleɪbl","v. 标注；贴标签于","label"],
+"labor":"n. 劳动力；劳动",
+"lack":["læk","v. 缺乏；没有"],
+"laptop":["ˈlæptɑːp","n. 膝上型轻便电脑"],
+"larger":["","adj. 大的","large"],
+"largest":"adj. 最大的",
+"late":"adv./adj. 迟，晚",
+"lateness":"n. 迟到",
+"later":["","adv./adj. 迟，晚","late"],
+"lead":["lid; lɛd","领导；管理"],
+"leading":["ˈliːdɪŋ","adj. 主要的；领导的"],
+"learn":"v. 学习",
+"leaves":["liv","离开；出发","leave"],
+"leaving":["liv","离开；出发","leave"],
+"left":["liv","离开；出发","leave"],
+"legal":["ˈligl","法律上的；合法的"],
+"legally":["ˈligl","法律上的；合法的","legal"],
+"let":"v. 让，允许",
+"letter":"n. 信函",
+"liabilities":["ˌlaɪəˈbɪləti","n. 责任；义务","liability"],
+"liberty":"n. 自由",
+"light":"n. 光，灯；adj. 轻的",
+"limit":["ˈlɪmɪt","限度；极限"],
+"limited":["ˈlɪmɪtɪd","adj. 有限的"],
+"line":"n. 生产线；线路；排",
+"lists":["","v. 列出；n. 清单","list"],
+"lobby":["ˈlɑːbi","n. 前厅；厅堂议会休息室游说议员的团体"],
+"local":"adj. 当地的；本地的",
+"located":"v. 位于（be located in）",
+"locked":["","v. 锁上","lock"],
+"looking":["","v. 看；显得；寻找","look"],
+"looks":["","v. 看；显得；寻找","look"],
+"lose":"v. 失去，丢掉",
+"losses":["lɔs","丧失；遗失","loss"],
+"lost":["","v. 失去，丢掉","lose"],
+"lounge":"n. 休息室；v. 倚靠",
+"low":"adj. 低的；v. 降低",
+"lowered":["","adj. 低的；v. 降低","lower"],
+"machine":["mə'ʃin","机器；机械"],
+"made":["","v. 做，制造；预订","make"],
+"main":"adj. 主要的",
+"mainly":["ˈmenli","大体上；主要地"],
+"make":"v. 做，制造；预订",
+"makes":["","v. 做，制造；预订","make"],
+"man":"n. 男人；人",
+"management":["ˈmænɪdʒmənt","管理；经营"],
+"manager":"n. 经理，管理者",
+"managers":["","n. 经理，管理者","manager"],
+"manual":"n. 手册；adj. 手工的",
+"market":"n. 市场",
+"marketing":"n. 市场营销",
+"materials":["","n. 材料，原料","material"],
+"meal":"n. 一餐，一顿饭",
+"media":["ˈmiːdiə","n. 媒体；媒质（medium的复数）"],
+"meet":"v. 满足；会见",
+"meeting":"n. 会议",
+"members":["ˈmɛmbɚ","成员；会员","member"],
+"membership":["ˈmembərʃɪp","n. 全体会员会员身份；会员资格"],
+"memorable":["ˈmɛmərəbl","容易记住的；难忘的"],
+"million":"num. 百万",
+"mirror":["ˈmɪrɚ","镜；镜子"],
+"missed":["","v. 错过；想念","miss"],
+"model":"n. 型号；模型",
+"modified":["ˈmɑːdɪfaɪ","v. 修改；修饰","modify"],
+"moment":["ˈmomənt","片刻；瞬间"],
+"month":"n. 月，月份",
+"monthly":"adj./adv. 每月的（地）",
+"months":["","n. 月，月份","month"],
+"morning":"n. 早晨，上午",
+"moved":["","v. 移动；搬家","move"],
+"name":"n. 名字；v. 命名",
+"natural":"adj. 自然的，天然的",
+"near":"prep./adj. 靠近；近的",
+"need":"v./n. 需要",
+"negotiating":["nɪ'ɡoʃɪet","协商；谈判","negotiate"],
+"never":"adv. 从不",
+"new":"adj. 新的",
+"night":"n. 夜晚",
+"nights":["","n. 夜晚","night"],
+"noon":"n. 正午",
+"notice":"n. 通知，告示；v. 注意到",
+"o'clock":"adv. ……点钟",
+"offer":"v. 提供；n. 报价",
+"offered":["","v. 提供；n. 报价","offer"],
+"offers":["","v. 提供；n. 报价","offer"],
+"office":"n. 办公室；办事处",
+"offices":["","n. 办公室；办事处","office"],
+"often":"adv. 经常",
+"old":"adj. 旧的；年长的",
+"older":["","adj. 旧的；年长的","old"],
+"on-site":"adj./adv. 现场的（地）",
+"open":"v. 开设，打开；adj. 开放的",
+"opened":["","v. 开设，打开；adj. 开放的","open"],
+"optimistic":["ˌɑːptɪˈmɪstɪk","adj. 乐观的；乐观主义的"],
+"ordered":["","n. 订单；v. 订购","order"],
+"ordering":["","n. 订单；v. 订购","order"],
+"orders":["","n. 订单；v. 订购","order"],
+"original":["əˈrɪdʒənl","n. 原物；原作"],
+"ourselves":"pron. 我们自己",
+"outlets":["","n. 门店，经销店；出口","outlet"],
+"oversees":["ˈovɚ'si","监督；监视","oversee"],
+"package":"n. 套餐；包裹",
+"packages":["","n. 套餐；包裹","package"],
+"paid":["","v. 支付；n. 薪水","pay"],
+"paperwork":"n. 文书工作",
+"participants":["pɑːrˈtɪsɪpənt","n. 参加者；参与者","participant"],
+"partners":["","n. 合作伙伴","partner"],
+"parts":["pɑrt","部分；（使）分开","part"],
+"party":"n. 聚会；党派",
+"passengers":["ˈpæsɪndʒər","n. 乘客；旅客","passenger"],
+"patents":["","n. 专利","patent"],
+"patience":["ˈpeɪʃns","n. 耐性；忍耐力"],
+"pay":"v. 支付；n. 薪水",
+"payment":["ˈpeɪmənt","n. 支付；付款"],
+"pension":"n. 养老金",
+"people":"n. 人",
+"percent":"n. 百分之……",
+"perfect":["ˈpɝfɪkt; (for v.) pɝˈfɛkt","完美的；理想的"],
+"performance":"n. 绩效，表现",
+"persuaded":["pərˈsweɪd","v. 说服；劝告","persuade"],
+"pharisees":["","n. 法利赛人（《圣经》中严守律法的一派）","pharisee"],
+"phones":["","n. 电话","phone"],
+"piece":["pis","拼凑；拼合"],
+"pith":"n. 核心，精髓（of great pith and moment 极其重大的）",
+"place":"n. 地方；v. 放置",
+"placed":["","n. 地方；v. 放置","place"],
+"plan":"n. 计划；v. 计划",
+"plans":["","n. 计划；v. 计划","plan"],
+"plant":"n. 工厂；植物",
+"please":"v. 请；使满意",
+"point":["pɔɪnt","n. 要点；尖端"],
+"politely":["pəˈlaɪt","adj. 有礼貌的；客气的有教养的","polite"],
+"popular":["ˈpɑːpjələr","adj. 流行的；通俗的"],
+"port":["pɔrt","港口；口岸"],
+"position":"n. 职位；位置",
+"possession":["pəˈzeʃn","n. 占有；持有"],
+"post":"n. 邮政；职位；v. 发布",
+"posted":["","n. 邮政；职位；v. 发布","post"],
+"posterity":"n. 后代，子孙",
+"power":["ˈpaʊər","n. 能力；力量"],
+"praised":["","v. 赞扬","praise"],
+"pray":["pre","祈祷；祈求"],
+"prefer":["prɪˈfɜːr","v. 宁愿；更喜欢"],
+"prepares":["prɪˈper","v. 准备；v. 筹备","prepare"],
+"presentation":["ˌpriːzenˈteɪʃn","n. 提供；显示外观授予(物)"],
+"price":["praɪs","n. 价格；代价"],
+"prices":["praɪs","n. 价格；代价","price"],
+"printer":["ˈprɪntɚ","打印机；印刷工"],
+"privacy":"n. 隐私",
+"procured":["prə'kjʊr","取得；获得","procure"],
+"product":"n. 产品",
+"production":"n. 生产；产量",
+"products":["","n. 产品","product"],
+"progress":["ˈprɑɡrɛs","n. 进步；发展"],
+"prohibited":["prəˈhɪbɪt","v. 阻止；禁止","prohibit"],
+"project":"n. 项目",
+"promoted":["","v. 晋升；推广","promote"],
+"prompted":["prɑːmpt","adj. 敏捷的；迅速的","prompt"],
+"protected":["prə'tɛkt","v. 保护；防卫","protect"],
+"provides":["prə'vaɪd","提供；供给","provide"],
+"publish":["ˈpʌblɪʃ","出版；刊印"],
+"purchases":["ˈpɜːrtʃəs","n. 购买；紧握","purchase"],
+"qualifications":["ˌkwɑːlɪfɪˈkeɪʃn","n. 合格证书资格；条件限制","qualification"],
+"quality":["ˈkwɑləti","优良的；优质的"],
+"quarterly":["ˈkwɔrtɚli","按季度；一季一次"],
+"raise":"v. 提高；筹集",
+"ran":["","v. 运行，运转；经营","run"],
+"reached":["","v. 达成；到达","reach"],
+"read":"v. 阅读",
+"real":"adj. 真正的；名副其实的",
+"recall":["ˈrikɔl","记得；回想"],
+"receive":"v. 收到，获得",
+"received":["","v. 收到，获得","receive"],
+"receives":["","v. 收到，获得","receive"],
+"recent":"adj. 最近的",
+"recorded":["","n. 记录，档案；v. 记录","record"],
+"records":["","n. 记录，档案；v. 记录","record"],
+"recover":["rɪ'kʌvɚ","复原；恢复"],
+"recovered":["rɪ'kʌvɚ","复原；恢复","recover"],
+"recycle":[",ri'saɪkl","回收利用"],
+"redeem":["rɪ'dim","兑现；还清"],
+"reduced":["rɪˈduːs","v. 减少；降低","reduce"],
+"refunds":["","n. 退款；v. 退款","refund"],
+"regard":"v. 看待；n. 关注（with regard to 关于）",
+"regional":"adj. 区域的",
+"register":"v. 登记，注册",
+"regular":["ˈreɡjələr","adj. 整齐的；定期的"],
+"regulations":["ˌrɛɡjəˈleʃən","规章；规则","regulation"],
+"reimbursed":["ˌriːɪmˈbɜːrs","v. 偿还；付还","reimburse"],
+"rejoice":["rɪ'dʒɔɪs","感到高兴；充满喜悦"],
+"remotely":["rɪ'mot","遥远的；偏僻的","remote"],
+"repair":"n./v. 维修",
+"repeated":["","v. 重复；adj. 反复的","repeat"],
+"reply":"n./v. 回复",
+"report":"n. 报告；v. 公布，报告",
+"reported":["","n. 报告；v. 公布，报告","report"],
+"request":"v./n. 请求",
+"required":["","v. 需要，要求","require"],
+"requires":["","v. 需要，要求","require"],
+"rescheduled":["riˈskɛdʒul","v. 重订时间表","reschedule"],
+"research":"n. 研究",
+"reshaping":["","v. 重塑，重新塑造","reshape"],
+"resigned":["rɪˈzaɪn","v. 辞职；放弃","resign"],
+"resolved":["rɪˈzɑːlv","v. 决定；使…分解","resolve"],
+"responsibilities":["rɪˌspɑːnsəˈbɪləti","n. 责任责任感；可信赖性职责","responsibility"],
+"restarting":["","v. 重新启动","restart"],
+"restricted":["rɪ'strɪkt","限制；约束","restrict"],
+"results":["rɪˈzʌlts","一个会计期间的损益状况"],
+"returned":["rɪ'tɝn","往返的；归还","return"],
+"review":"n. 回顾；审查；评论",
+"righteousness":"n. 正义，正直",
+"rights":"n. 权利（right 的复数）",
+"risen":"v. 上升（rise 的过去分词）",
+"rising":["raɪz","上升；上涨","rise"],
+"rival":["ˈraɪvl","n. 竞争对手；v. 与…竞争"],
+"room":"n. 房间",
+"rose":"v. 上升（rise 的过去式）；n. 玫瑰",
+"round-trip":["ˈraʊndˈtrɪp","adj. 来回旅程的"],
+"route":["ruːt","n. 路；路途"],
+"rules":["rul","统治；控制","rule"],
+"running":["","v. 运行，运转；经营","run"],
+"runs":["","v. 运行，运转；经营","run"],
+"safe":["sef","安全的；平安的"],
+"safety":"n. 安全",
+"salary":["ˈsæləri","n. 薪水"],
+"sales":"n. 销售额；销售（工作）",
+"salesperson":"n. 销售员",
+"save":["seɪv","v. 拯救；挽救"],
+"saves":["sef","安全的；平安的","safe"],
+"savings":["ˈsevɪŋz","积蓄；存款"],
+"scheduled":["","v. 安排；n. 日程","schedule"],
+"scribes":["","n. 文士，抄写员","scribe"],
+"sealed":["sil","封铅；封条","seal"],
+"season":"n. 季节",
+"seating":"n. 座位安排",
+"seats":["sit","n. 坐席；座位所在地","seat"],
+"secure":"v. 确保，保障；adj. 安全的",
+"security":["sə'kjʊrəti","保安措施；安全工作"],
+"seller":["sɛl","卖；销售","sell"],
+"sells":["sɛl","卖；销售","sell"],
+"send":"v. 发送",
+"sent":["","v. 发送","send"],
+"seoul":"n. 首尔（韩国首都）",
+"served":["sɝv","服务；供职","serve"],
+"server":["ˈsɝvɚ","n. 服务器"],
+"service":"n. 服务",
+"settled":["ˈsɛtl","安家；飞落","settle"],
+"several":"adj. 几个",
+"sharply":"adv. 急剧地",
+"sheet":"n. 表单；一张（纸）；床单",
+"shipping":["ˈʃɪpɪŋ","n. 海运；运送"],
+"shows":["","v. 显示；表明","show"],
+"sides":["saɪd","n. 面；侧面","side"],
+"signed":["","v. 签署；n. 标志","sign"],
+"signing":["","v. 签署；n. 标志","sign"],
+"simple":"adj. 简单的",
+"sin":["sɪn","犯戒律；犯过失"],
+"single":["ˈsɪŋɡl","单一的；独身的"],
+"skilled":["skɪld","有技能的；熟练的"],
+"slightly":"adv. 略微",
+"small":"adj. 小的",
+"smaller":["","adj. 小的","small"],
+"smoking":"n. 吸烟；adj. 吸烟的",
+"social":["ˈsoʃl","社会的；交际的"],
+"soft":["sɔft","柔软的；柔和的"],
+"soul":"n. 灵魂",
+"specifications":["ˌspesɪfɪˈkeɪʃn","n. 说明书；详细的计划书载明","specification"],
+"spelling":["ˈspɛlɪŋ","拼字；拼法"],
+"sponsors":["","v. 赞助；n. 赞助商","sponsor"],
+"sports":["","n. 体育运动","sport"],
+"spring":"n. 春季",
+"staff":"n. 全体员工",
+"standard":["ˈstændɚd","标准的；标准"],
+"standards":["ˈstændɚd","标准的；标准","standard"],
+"statement":["ˈsteɪtmənt","n. 声明；陈述结算单"],
+"states":["stet","陈述；说明","state"],
+"stay":"v. 停留；n. 逗留",
+"stays":["","v. 停留；n. 逗留","stay"],
+"steady":["ˈstɛdi","稳的；平稳的"],
+"stock":["stɑːk","n. 储备品；供应物(商店的)现货"],
+"storage":["ˈstɔːrɪdʒ","n. 存储；仓库"],
+"store":"n. 商店；v. 存放",
+"stored":["","n. 商店；v. 存放","store"],
+"stores":["","n. 商店；v. 存放","store"],
+"strong":"adj. 强壮的；强劲的",
+"struggles":["","v./n. 挣扎，奋斗","struggle"],
+"studies":["","v./n. 学习；研究","study"],
+"submissions":["səb'mɪʃən","屈服；服从","submission"],
+"submitted":["səbˈmɪt","v. 屈服；认输","submit"],
+"subsidiaries":["səbˈsɪdieri","adj. 附带的；附属的","subsidiary"],
+"subway":["ˈsʌbweɪ","n. 地铁；地道"],
+"summarized":["ˈsʌməraɪz","总结；概述","summarize"],
+"support":["səˈpɔːrt","v. 支撑；撑扶"],
+"system":"n. 系统",
+"systems":["","n. 系统","system"],
+"take":"v. 拿；记录；花费",
+"talent":["ˈtælənt","天资；才能"],
+"task":["tæsk","n. 工作；任务"],
+"tax":"n. 税；v. 征税",
+"taxes":["","n. 税；v. 征税","tax"],
+"taxi":"n. 出租车",
+"team":"n. 团队",
+"teamwork":["ˈtimwɝk","协力合作；团队合作"],
+"temptation":["tɛmp'teʃən","诱惑；引诱"],
+"tenth":"num. 第十",
+"testing":["","n./v. 测试，检验","test"],
+"tests":["","n./v. 测试，检验","test"],
+"thank":"v./n. 感谢",
+"thanks":["","v./n. 感谢","thank"],
+"thereof":"adv. 由此，其中（古语）",
+"thing":"n. 事情，东西",
+"three-hour":"adj. 三小时的",
+"three-year":"adj. 三年的",
+"through":["θru","从头到尾；自始至终"],
+"time":"n. 时间；次数",
+"timeline":"n. 时间表，进度安排",
+"today":"adv./n. 今天",
+"tokyo":"n. 东京（日本首都）",
+"tomorrow":"adv./n. 明天",
+"took":["","v. 拿；记录；花费","take"],
+"top":"n. 顶部；adj. 最高的，顶尖的",
+"tour":"n. 旅游（线路）",
+"traffic":["ˈtræfɪk","n. 交通；贸易"],
+"train":"n. 火车；v. 培训",
+"trained":["","n. 火车；v. 培训","train"],
+"trainee":[",tre'ni","受训者"],
+"training":"n. 培训，训练",
+"tranquility":["træŋˈkwɪləti","n. 平静;安静;安宁平稳;稳定"],
+"travel":"n. 差旅；v. 旅行",
+"trust":["trʌst","n. 相信；信任"],
+"truth":"n. 真理，真相",
+"turn":["tɜːrn","v. （使）转动；旋转（使）改变方向"],
+"twelve":"num. 十二",
+"twenty":"num. 二十",
+"twice":"adv. 两次，两倍",
+"two-day":"adj. 两天的",
+"two-year":"adj. 两年的",
+"union":["ˈjunɪən","工会；联盟"],
+"unit":"n. 单位；件（货物）",
+"united":["","n. 单位；件（货物）","unit"],
+"units":["","n. 单位；件（货物）","unit"],
+"universally":["ˈjʊnə'vɝsl","普遍的；通用的","universal"],
+"unto":"prep. 到，向（古语，＝to）",
+"update":"v. 更新；n. 最新进展",
+"updated":["","v. 更新；n. 最新进展","update"],
+"upgraded":["","v. 升级","upgrade"],
+"upon":"prep. 在……之上（＝on）",
+"uses":["","v./n. 使用","use"],
+"vacation":["veɪˈkeɪʃn","n. 假期；（房屋）搬出"],
+"vain":["ven","徒劳的；自负的"],
+"valuable":["ˈvæljuəbəl; ˈvæljə-","值钱的；贵重的"],
+"value":["ˈvælju","价值；尊重"],
+"vendors":["ˈvendər","n. 小贩；卖主","vendor"],
+"violated":["ˈvaɪəlet","违反；违背","violate"],
+"visit":"v./n. 拜访，参观",
+"wages":["","n. 工资","wage"],
+"want":"v. 想要",
+"waste":["west","废的；无用的"],
+"water":"n. 水",
+"web":["wɛb","网；网络"],
+"weddings":["","n. 婚礼","wedding"],
+"week":"n. 周，星期",
+"weekday":"n. 工作日",
+"weekend":"n. 周末",
+"weekends":["","n. 周末","weekend"],
+"welfare":"n. 福利",
+"what":"pron. 什么",
+"whole":"adj. 整个的，全部的",
+"wide":"adj. 宽的，广泛的",
+"wife":"n. 妻子",
+"window":"n. 窗户；（时间）窗口",
+"winter":"n. 冬季",
+"within":"prep. 在……之内",
+"without":"prep. 没有，不带",
+"work":"v. 工作，运转；n. 工作",
+"worked":["","v. 工作，运转；n. 工作","work"],
+"workers":["","n. 工人，员工","worker"],
+"working":["","v. 工作，运转；n. 工作","work"],
+"world":"n. 世界",
+"ye":"pron. 你们（古语）",
+"year":"n. 年",
+"years":["","n. 年","year"],
+"yen":"n. 日元",
+"yesterday":"adv./n. 昨天",
+"young":"adj. 年轻的"
+};
+
 /* ---------- 状态 ---------- */
 function load(){
   let s = null;
@@ -1411,6 +2151,7 @@ function load(){
   s.words = s.words || {};
   s.log = s.log || {};
   s.custom = Array.isArray(s.custom) ? s.custom : [];
+  s.flags = s.flags || {};
   return s;
 }
 let state = load();
@@ -1446,6 +2187,72 @@ function mnHtml(it, cls){
   if(!it || !it.mn || !state.settings.showMn) return '';
   return '<div class="fc-mn' + (cls ? ' ' + cls : '') + '"><span class="mn-tag">助记</span>' + esc(it.mn) + '</div>';
 }
+/* 例句里的词：认识的词包成可点片段（词库词 + 例句词表） */
+function wdHit(w){
+  if(IDX[w] !== undefined) return true;
+  return !!GLOSS[w];
+}
+function markWords(sen){
+  if(!sen) return '';
+  const re = /[A-Za-z][A-Za-z'’-]*/g;
+  let out = '', last = 0, m;
+  while((m = re.exec(sen)) !== null){
+    out += esc(sen.slice(last, m.index));
+    const tok = m[0];
+    const key = tok.toLowerCase().replace(/[’']s$/, '').replace(/[’']$/, '').replace(/^-+|-+$/g, '');
+    out += wdHit(key)
+      ? '<span class="wd" data-w="' + esc(key) + '">' + esc(tok) + '</span>'
+      : esc(tok);
+    last = m.index + tok.length;
+  }
+  return out + esc(sen.slice(last));
+}
+/* 释义浮层 */
+let wdShown = '', wdPinned = false, wdShownAt = 0;
+function hideWordPop(){
+  const p = document.getElementById('wdPop');
+  if(p) p.hidden = true;
+  wdShown = '';
+  wdPinned = false;
+}
+function showWordPop(word, anchor){
+  const pop = document.getElementById('wdPop');
+  if(!pop || !anchor) return;
+  const bi = IDX[word];
+  let head = '', body = '';
+  if(bi !== undefined){
+    const it = ALL[bi];
+    head = '<b>' + esc(it.w) + '</b>' +
+      (it.ph ? '<span class="wdp-ph">' + esc(it.ph) + '</span>' : '') +
+      '<button class="ic wdp-sp" data-speak="' + esc(it.w) + '" title="朗读">' + SPK + '</button>' +
+      '<span class="wdp-tag">词库</span>';
+    body = '<div class="wdp-t">' + esc(it.mean) + '</div>' +
+      (it.mn && state.settings.showMn ? '<div class="wdp-mn">' + esc(it.mn) + '</div>' : '');
+  } else {
+    const g = GLOSS[word];
+    if(!g) return;
+    const ph = Array.isArray(g) ? g[0] : '';
+    const tx = Array.isArray(g) ? g[1] : g;
+    const lem = (Array.isArray(g) && g[2]) ? g[2] : '';
+    head = '<b>' + esc(word) + '</b>' +
+      (lem ? '<span class="wdp-lem">← ' + esc(lem) + '</span>' : '') +
+      (ph ? '<span class="wdp-ph">/' + esc(ph) + '/</span>' : '') +
+      '<button class="ic wdp-sp" data-speak="' + esc(word) + '" title="朗读">' + SPK + '</button>';
+    body = '<div class="wdp-t">' + esc(tx) + '</div>';
+  }
+  pop.innerHTML = '<div class="wdp-h">' + head + '</div>' + body;
+  pop.hidden = false;
+  const r = anchor.getBoundingClientRect();
+  const pw = pop.offsetWidth, phh = pop.offsetHeight;
+  let left = r.left + r.width / 2 - pw / 2;
+  left = Math.max(8, Math.min(left, (window.innerWidth || 360) - pw - 8));
+  let top = r.bottom + 8;
+  if(top + phh > (window.innerHeight || 600) - 8) top = r.top - phh - 8;
+  pop.style.left = Math.round(left) + 'px';
+  pop.style.top = Math.round(Math.max(8, top)) + 'px';
+  wdShown = word;
+  wdShownAt = Date.now();
+}
 /* 释义 + 每个义项一句例句 */
 function senseHtml(it){
   if(!it) return '';
@@ -1455,7 +2262,7 @@ function senseHtml(it){
     const pos = s[0], cn = s[1], ex = s[2], zh = s[3];
     h += '<div class="sense">' +
       '<div class="sense-h">' + (pos ? '<b>' + esc(pos) + '</b>' : '') + esc(cn || '') + '</div>' +
-      (ex ? '<div class="sense-ex">' + esc(ex) + '</div>' : '') +
+      (ex ? '<div class="sense-ex">' + markWords(ex) + '</div>' : '') +
       (zh ? '<div class="sense-zh">' + esc(zh) + '</div>' : '') +
     '</div>';
   });
@@ -1466,7 +2273,7 @@ function quoteHtml(it){
   if(!it || !it.qt) return '';
   return '<div class="quote">' +
     '<span class="q-tag">经典</span>' +
-    '<p class="q-en">“' + esc(it.qt[0]) + '”</p>' +
+    '<p class="q-en">“' + markWords(it.qt[0]) + '”</p>' +
     '<p class="q-zh">' + esc(it.qt[1]) + '</p>' +
     '<p class="q-src">— ' + esc(it.qt[2]) + '</p>' +
   '</div>';
@@ -1841,6 +2648,10 @@ function flipCard(){
   ctx.flipped = true;
   $('#fc').classList.add('flipped');
   $('#grades').hidden = false;
+  if(!state.flags.wdHint){
+    state.flags.wdHint = 1; save();
+    toast('小提示：点一下例句里的单词，就能看它的中文释义');
+  }
 }
 
 /* ---------- 前后翻页 ---------- */
@@ -2390,6 +3201,48 @@ function bindGlobal(){
   document.addEventListener('click', function(e){
     const s = e.target.closest('[data-speak]');
     if(s) speak(s.dataset.speak);
+  });
+  /* ---- 例句单词：点一下 / 悬停看释义 ---- */
+  const pop = $('#wdPop');
+  let wdHoverT = null, wdHideT = null;
+  document.addEventListener('click', function(e){
+    if(!e.target || !e.target.closest) return;
+    if(e.target.closest('#wdPop')) return;          // 浮层里的朗读按钮
+    const wd = e.target.closest('.wd');
+    if(!wd){ if(pop && !pop.hidden) hideWordPop(); return; }
+    e.preventDefault();
+    e.stopPropagation();                            // 别触发卡片翻转 / 词条折叠
+    const w = wd.dataset.w;
+    clearTimeout(wdHoverT); clearTimeout(wdHideT);
+    if(!pop.hidden && wdShown === w && wdPinned){ hideWordPop(); return; }  // 再点一次收起
+    showWordPop(w, wd);
+    wdPinned = true;                                // 点开了就固定住，鼠标移开也不消失
+  }, true);
+  document.addEventListener('mouseover', function(e){
+    if(!e.target || !e.target.closest) return;
+    const wd = e.target.closest('.wd');
+    if(!wd) return;
+    clearTimeout(wdHoverT); clearTimeout(wdHideT);
+    const w = wd.dataset.w;
+    if(wdPinned){
+      if(wdShown !== w){ wdPinned = false; showWordPop(w, wd); }
+      return;
+    }
+    wdHoverT = setTimeout(function(){ if(!wdPinned) showWordPop(w, wd); }, 170);
+  }, true);
+  document.addEventListener('mouseout', function(e){
+    if(!e.target || !e.target.closest || !e.target.closest('.wd')) return;
+    clearTimeout(wdHoverT);
+    if(wdPinned) return;
+    wdHideT = setTimeout(function(){ if(!wdPinned) hideWordPop(); }, 170);
+  }, true);
+  window.addEventListener('scroll', function(){
+    // 刚弹出时不因滚动事件被打断（点词后浏览器可能微调滚动）
+    if(pop && !pop.hidden && Date.now() - wdShownAt > 320) hideWordPop();
+  }, true);
+  window.addEventListener('resize', function(){ if(pop && !pop.hidden) hideWordPop(); });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && pop && !pop.hidden) hideWordPop();
   });
   document.addEventListener('keydown', function(e){
     const tag = (e.target.tagName || '').toLowerCase();
