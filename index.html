@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>托业背单词 · TOEIC Vocab</title>
 <!-- 发版只需改下面这行的 content，页面里所有版本号与更新检测都读它 -->
-<meta name="app-version" content="1.4.0">
+<meta name="app-version" content="1.5.0">
 <meta name="app-name" content="托业背单词">
 <style>
 *{box-sizing:border-box}
@@ -16,6 +16,7 @@
   --teal:#0eb5a6; --ok:#11a05e; --ok-soft:#e8f8ef;
   --warn:#d98600; --warn-soft:#fff6e3;
   --mn:#a9660a; --mn-soft:#fff8ea; --mn-line:#f4e2bf;
+  --coll:#0a8074; --coll-soft:#eafaf7; --coll-zh:#5a6684;
   --bad:#e0455e; --bad-soft:#fdeced;
   --shadow:0 8px 30px rgba(22,35,68,.07);
   --shadow-sm:0 2px 8px rgba(22,35,68,.05);
@@ -28,6 +29,7 @@
   --teal:#2fd0c0; --ok:#35cc85; --ok-soft:#12291f;
   --warn:#f0b23c; --warn-soft:#2a2314;
   --mn:#f0c069; --mn-soft:#241f14; --mn-line:#3b3220;
+  --coll:#3fd2c0; --coll-soft:#0f2422; --coll-zh:#93a1bd;
   --bad:#ff6b81; --bad-soft:#2c171c;
   --shadow:0 10px 34px rgba(0,0,0,.4);
   --shadow-sm:0 2px 10px rgba(0,0,0,.3);
@@ -218,6 +220,24 @@ input,select,textarea{font-family:inherit;font-size:14px;color:var(--text)}
 .q-en{font-family:Georgia,"Times New Roman",serif;font-size:13.5px;line-height:1.62;color:var(--text)}
 .q-zh{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.55}
 .q-src{font-size:11.5px;color:var(--accent);margin-top:6px;opacity:.92}
+/* 固定搭配 */
+.coll{
+  margin-top:12px;padding:11px 14px 12px;border-radius:11px;
+  background:var(--coll-soft);border-left:3px solid var(--coll);
+}
+.coll-h{margin-bottom:7px;line-height:1}
+.coll-tag{
+  display:inline-block;font-size:10px;font-weight:700;letter-spacing:.8px;
+  color:var(--coll);background:var(--panel);border-radius:5px;padding:1px 6px;
+}
+.coll-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.coll-list li{display:flex;gap:9px;align-items:baseline;flex-wrap:wrap}
+.c-en{font-family:Georgia,"Times New Roman",serif;font-size:13.5px;line-height:1.5;color:var(--text)}
+.c-zh{font-size:12.5px;line-height:1.5;color:var(--coll-zh)}
+.fb .coll{margin-top:10px;padding:9px 12px}
+.fb .c-en{font-size:12.5px}
+.fb .c-zh{font-size:11.5px}
+.wexp .coll{margin-top:10px}
 /* 例句可点词 + 释义浮层 */
 .wd{cursor:pointer;border-radius:3px;padding:0 1px;margin:0 -1px;transition:background .12s,color .12s}
 .wd:hover{background:var(--accent-soft);color:var(--accent)}
@@ -521,7 +541,7 @@ textarea#importBox:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--a
     <div class="side-foot">
       <div class="streak"><b id="sideStreak">0</b> 天连续打卡</div>
       <div class="side-note">进度保存在本机浏览器</div>
-      <div class="verline" id="sideVer">v1.4.0</div>
+      <div class="verline" id="sideVer">v1.5.0</div>
     </div>
   </aside>
 
@@ -598,6 +618,10 @@ textarea#importBox:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--a
           <label class="switch"><input type="checkbox" id="setMn"><i></i></label>
         </div>
         <div class="field">
+          <div><label>显示固定搭配</label><span class="hint">翻面后列出 2–4 条常用搭配，按「一串词」记而不是单个词</span></div>
+          <label class="switch"><input type="checkbox" id="setColl"><i></i></label>
+        </div>
+        <div class="field">
           <div><label>主题</label></div>
           <select id="setTheme">
             <option value="light">浅色</option>
@@ -629,7 +653,7 @@ textarea#importBox:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--a
           <li><b>← / →</b> 回看上一个 / 往回翻</li>
           <li><b>Enter</b> 拼写题提交答案</li>
           <li><b>S</b> 朗读当前单词</li>
-          <li><b>点单词</b> 例句里点一下（或鼠标悬停）看释义</li>
+          <li><b>点单词</b> 例句 / 搭配里点一下（或鼠标悬停）看释义</li>
         </ul>
       </div>
 
@@ -637,7 +661,7 @@ textarea#importBox:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--a
         <h3>版本与更新</h3>
         <div class="field">
           <div>
-            <label>当前版本 <span id="setVer" style="color:var(--accent);font-weight:600">v1.4.0</span></label>
+            <label>当前版本 <span id="setVer" style="color:var(--accent);font-weight:600">v1.5.0</span></label>
             <span class="hint" id="updHint">打开页面时会自动检查一次更新</span>
           </div>
           <button class="btn sm" id="btnCheckUpdate">检查更新</button>
@@ -2141,13 +2165,347 @@ const GLOSS = {
 "young":"adj. 年轻的"
 };
 
+/* 固定搭配：词条 → ["英文搭配|中文", …]，按词库顺序排列 */
+const COLL = {
+"agenda":["place A on the agenda|把 A 列入议程","set the agenda|确定议程","the agenda for the meeting|会议议程"],
+"postpone":["postpone A until B|把 A 推迟到 B","postpone the meeting|推迟会议","be postponed indefinitely|被无限期推迟"],
+"convene":["convene a meeting|召开会议","the board will convene|董事会将开会"],
+"adjourn":["adjourn the meeting|宣布休会","adjourn until Monday|休会至周一"],
+"minutes":["take the minutes|做会议记录","the minutes of the meeting|会议记录","approve the minutes|通过会议记录"],
+"attendee":["all attendees must register|所有出席者必须登记","a list of attendees|出席者名单"],
+"consensus":["reach a consensus on|就……达成共识","a consensus among members|成员之间的共识"],
+"proposal":["submit a proposal|提交提案","approve a proposal|批准提案","a proposal for the project|项目提案"],
+"negotiate":["negotiate with sb|与某人谈判","negotiate a better price|谈一个更好的价格","negotiate a contract|洽谈合同"],
+"objective":["our main objective is to|我们的主要目标是","a clear objective|明确的目标","stay objective|保持客观"],
+"clarify":["clarify the point|澄清这一点","could you clarify|你能说明一下吗","clarify the procedure|说明流程"],
+"summarize":["summarize the report|总结报告","briefly summarize|简要概括"],
+"brief":["a brief update|简要汇报","brief sb on sth|向某人简要介绍某事","keep it brief|简短一点"],
+"deadline":["meet a deadline|赶上截止日期","miss a deadline|错过截止日期","a tight deadline|紧迫的期限","extend the deadline|延长期限"],
+"participate":["participate in|参加","participate actively|积极参与"],
+"announce":["announce the results|公布结果","announce a plan|宣布计划","officially announce|正式宣布"],
+"confirm":["confirm the reservation|确认预订","confirm receipt of|确认收到","please confirm|请确认"],
+"reschedule":["reschedule the meeting|重新安排会议","reschedule A to B|把 A 改到 B"],
+"follow-up":["a follow-up email|后续邮件","follow up on|跟进","send a follow-up|发一封跟进邮件"],
+"handout":["distribute handouts|分发讲义","the handouts for the workshop|研讨会讲义"],
+"stationery":["order stationery|订购文具","stationery supplies|文具用品"],
+"photocopy":["photocopy the documents|复印文件","make a photocopy|复印一份"],
+"envelope":["a sealed envelope|密封信封","place the invoice in an envelope|把发票装进信封"],
+"appointment":["make an appointment|预约","keep an appointment|守约","cancel an appointment|取消预约"],
+"receptionist":["the receptionist will direct you|接待员会指引你","ask the receptionist|问接待员"],
+"cubicle":["a cubicle on the third floor|三楼的一个隔间","work in a cubicle|在隔间里办公"],
+"memorandum":["circulate a memorandum|传阅备忘录","a memorandum on|关于……的内部通知"],
+"archive":["archive old contracts|归档旧合同","keep the records in the archive|把记录存在档案室"],
+"supervisor":["report to your supervisor|向主管汇报","consult your supervisor|请示主管"],
+"colleague":["a colleague from another department|其他部门的同事","discuss it with a colleague|与同事讨论"],
+"procedure":["follow the standard procedure|按标准流程","the procedure for refunds|退款流程","a safety procedure|安全程序"],
+"maintenance":["routine maintenance|日常维护","out of service for maintenance|因维护暂停使用","maintenance costs|维护费用"],
+"renovation":["undergo renovation|进行翻新","the renovation of the lobby|大堂翻新"],
+"equipment":["office equipment|办公设备","heavy equipment|重型设备","inspect the equipment|检查设备"],
+"supplies":["office supplies|办公用品","run low on supplies|用品快用完了"],
+"overtime":["work overtime|加班","overtime pay|加班费"],
+"schedule":["on schedule|按进度","behind schedule|落后于进度","ahead of schedule|提前","schedule A for B|把 A 安排在 B"],
+"bulletin":["a bulletin board|公告栏","post a notice on the bulletin board|在公告栏贴通知"],
+"filing":["accurate filing|准确归档","a filing system|归档系统"],
+"errand":["run an errand|跑腿办事","send sb on an errand|派某人去办事"],
+"invoice":["send the invoice to|把发票寄给","pay the invoice|支付发票","invoice the client|给客户开票"],
+"receipt":["keep the receipt|保留收据","acknowledge receipt of|确认收到","a receipt for|关于……的收据"],
+"revenue":["annual revenue|年度收入","revenue grew by|收入增长了","generate revenue|创造收入"],
+"expense":["travel expenses|差旅费","an expense report|费用报销单","at the company's expense|由公司出钱"],
+"budget":["stay within the budget|控制在预算内","exceed the budget|超出预算","the marketing budget|营销预算"],
+"audit":["conduct an audit|进行审计","the annual audit|年度审计","audit the accounts|查账"],
+"asset":["a valuable asset|宝贵的资产","the largest asset|最大的资产","fixed assets|固定资产"],
+"liability":["liabilities|负债","limited liability|有限责任","accept liability for|对……承担责任"],
+"profit":["report a profit|公布盈利","make a profit|获利","profit margin|利润率"],
+"reimburse":["reimburse sb for sth|报销某人某笔费用","expenses will be reimbursed|费用可报销"],
+"accountant":["a certified accountant|注册会计师","hire an accountant|聘请会计"],
+"transaction":["each transaction is recorded|每笔交易都会被记录","a cash transaction|现金交易","process a transaction|处理一笔交易"],
+"currency":["local currency|当地货币","foreign currency|外币","exchange currency|兑换货币"],
+"installment":["pay in installments|分期付款","the first installment|首期款"],
+"deposit":["a deposit of 20 percent|20% 的押金","pay a deposit|付押金","deposit money into|把钱存入","a security deposit|保证金"],
+"withdraw":["withdraw cash|取现","withdraw an offer|撤回报价","withdraw from|退出"],
+"fiscal":["the fiscal year|财政年度","fiscal policy|财政政策"],
+"subsidy":["a government subsidy|政府补贴","a subsidy for training|培训补贴","apply for a subsidy|申请补贴"],
+"allocate":["allocate funds|拨款","allocate A to B|把 A 分配给 B","allocate resources|分配资源"],
+"estimate":["estimate the cost at|估计成本为","a cost estimate|成本估算","a rough estimate|粗略估计"],
+"quarter":["the first quarter|第一季度","quarterly results|季度业绩","in the second quarter|在第二季度"],
+"surplus":["a trade surplus|贸易顺差","a budget surplus|预算盈余"],
+"deduct":["deduct A from B|从 B 中扣除 A","tax deducted at source|源头扣税"],
+"appreciate":["the yen appreciated against the dollar|日元对美元升值","appreciate your help|感谢你的帮助","appreciate in value|升值"],
+"recruit":["recruit new staff|招聘新员工","recruit graduates|招聘毕业生","recruit for the branch|为分公司招人"],
+"candidate":["a strong candidate for the position|该职位的有力人选","interview a candidate|面试候选人","the ideal candidate|理想人选"],
+"resume":["submit a resume|提交简历","update your resume|更新简历","attach a resume to the application|在申请中附上简历"],
+"qualification":["meet the qualifications|符合资格要求","professional qualifications|专业资格","a qualification in accounting|会计资格"],
+"probation":["on probation for three months|试用三个月","pass the probation period|通过试用期","a six-month probation period|六个月的试用期"],
+"promote":["be promoted to manager|晋升为经理","promote a new product|推广新产品","promote from within|内部提拔"],
+"resign":["resign from the company|从公司辞职","resign as chairman|辞去董事长职务","resign from one's post|辞职离任"],
+"retire":["retire at 60|60 岁退休","retire from the company|从公司退休","retire early|提前退休"],
+"benefits":["a benefits package|一揽子福利","health benefits|医疗福利","employee benefits|员工福利"],
+"compensation":["a compensation package|薪酬方案","workers' compensation|工伤赔偿","receive compensation for|就……获得赔偿"],
+"appraisal":["an annual performance appraisal|年度绩效考核","conduct an appraisal|进行考核","a job appraisal|工作评估"],
+"vacancy":["fill a vacancy|填补空缺","a vacancy in the sales department|销售部的空缺","advertise a vacancy|刊登招聘空缺"],
+"applicant":["applicants must submit|申请人必须提交","successful applicants will be contacted|入选者将收到通知","a job applicant|求职者"],
+"personnel":["the personnel department|人事部","personnel records|人事档案","trained personnel|受过培训的人员"],
+"workforce":["a skilled workforce|熟练的劳动力","reduce the workforce|裁员","join the workforce|进入职场"],
+"dismiss":["be dismissed for misconduct|因不当行为被解雇","dismiss the claim|驳回索赔","dismiss the idea|否定这个想法"],
+"incentive":["a financial incentive|经济激励","an incentive to work harder|更努力工作的激励","offer incentives to staff|向员工提供激励"],
+"orientation":["a new employee orientation|新员工入职培训","attend orientation|参加入职培训","an orientation session|情况介绍会"],
+"takeover":["a hostile takeover|恶意收购","the takeover of the company|对公司的收购","complete a takeover|完成收购"],
+"wage":["the minimum wage|最低工资","a wage increase|工资上涨","hourly wages|时薪"],
+"advertise":["advertise a position|刊登职位招聘","advertise the product online|在网上为产品做广告","advertise in a magazine|在杂志上做广告"],
+"campaign":["launch an advertising campaign|发起广告宣传活动","an election campaign|竞选活动","a marketing campaign|营销活动"],
+"brand":["brand loyalty|品牌忠诚度","a brand name|品牌名称","launch a new brand|推出新品牌"],
+"promotion":["a sales promotion|促销活动","get a promotion|获得晋升","a promotional offer|促销优惠"],
+"survey":["conduct a survey|进行调查","according to a recent survey|根据最近的调查","survey customers|调查顾客"],
+"launch":["launch a new product|推出新产品","the launch of the service|服务的推出","launch a website|上线网站"],
+"strategy":["a marketing strategy|营销策略","develop a strategy|制定策略","a long-term strategy|长期战略"],
+"sponsor":["sponsor an event|赞助活动","a corporate sponsor|企业赞助商","be sponsored by|由……赞助"],
+"endorse":["endorse a product|为产品代言","endorse a candidate|支持某位候选人","a celebrity endorsement|名人代言"],
+"publicity":["generate publicity|引起关注","a publicity campaign|宣传活动","receive negative publicity|受到负面报道"],
+"competitor":["a major competitor|主要竞争对手","keep up with competitors|跟上竞争对手","outperform competitors|表现优于竞争对手"],
+"demographic":["demographic changes|人口结构变化","target a younger demographic|瞄准更年轻的客户群","demographic data|人口统计数据"],
+"retail":["retail prices|零售价","a retail store|零售店","the retail sector|零售业"],
+"wholesale":["wholesale prices|批发价","buy at wholesale|以批发价买入","a wholesale distributor|批发经销商"],
+"merchandise":["a wide range of merchandise|种类繁多的商品","display the merchandise|陈列商品","returned merchandise|退回的商品"],
+"coupon":["redeem a coupon|使用优惠券","a discount coupon|折扣券","clip a coupon|剪下优惠券"],
+"slogan":["an advertising slogan|广告标语","come up with a slogan|想出一句口号"],
+"logo":["the company logo|公司标识","redesign the logo|重新设计标识","print the logo on|把标识印在……上"],
+"consumer":["consumer confidence|消费者信心","consumer demand|消费者需求","protect consumers|保护消费者"],
+"outlet":["a retail outlet|零售门店","open a new outlet|开一家新门店","an outlet for|……的销路"],
+"quotation":["request a quotation|索取报价","a quotation for the equipment|设备报价","send a quotation|寄送报价单"],
+"discount":["offer a 10 percent discount|提供 10% 的折扣","at a discount|打折出售","a volume discount|数量折扣"],
+"warranty":["under warranty|在保修期内","a one-year warranty|一年保修","the warranty expires|保修到期"],
+"refund":["a full refund|全额退款","request a refund|要求退款","refund the purchase price|退还购货款"],
+"purchase":["make a purchase|购买","a purchase order|采购订单","purchase in bulk|批量采购"],
+"client":["a regular client|老客户","meet the client's needs|满足客户需求","retain clients|留住客户"],
+"agreement":["reach an agreement|达成协议","a written agreement|书面协议","in agreement with|与……一致"],
+"terms":["the terms of the contract|合同条款","on favorable terms|以优惠条件","come to terms with|与……达成一致"],
+"deliver":["deliver the goods|交货","deliver on time|按时交付","deliver a speech|发表演讲"],
+"shipment":["a shipment of|一批……货物","track the shipment|追踪货物","delay the shipment|延迟发货"],
+"inventory":["take inventory|盘点库存","keep inventory low|保持低库存","an inventory of|……的清单"],
+"supplier":["a reliable supplier|可靠的供应商","the sole supplier|独家供应商","switch suppliers|更换供应商"],
+"vendor":["a software vendor|软件供应商","contact the vendor|联系供应商","select a vendor|选择供应商"],
+"order":["place an order|下订单","fill an order|执行订单","out of order|出现故障","in order to|为了"],
+"bargain":["a real bargain|真便宜","bargain with sb over sth|就某事与某人讨价还价","bargain hunters|淘便宜货的人"],
+"wholesaler":["buy directly from the wholesaler|直接从批发商购买","a food wholesaler|食品批发商"],
+"itinerary":["prepare an itinerary|准备行程表","a detailed itinerary|详细的行程","change the itinerary|修改行程"],
+"reservation":["make a reservation|预订","confirm a reservation|确认预订","cancel a reservation|取消预订"],
+"luggage":["carry-on luggage|随身行李","claim your luggage|提取行李","excess luggage|超重行李"],
+"accommodation":["arrange accommodation|安排住宿","hotel accommodation|酒店住宿","the cost of accommodation|住宿费用"],
+"departure":["the departure time|出发时间","the departure lounge|候机室","delays on departure|出发时的延误"],
+"arrival":["on arrival|到达时","the arrival time|到达时间","the arrivals hall|到达大厅"],
+"delay":["a two-hour delay|两小时的延误","without delay|立即，不拖延","be delayed by fog|因大雾延误"],
+"customs":["go through customs|过海关","a customs declaration|海关申报单","customs officials|海关人员"],
+"shuttle":["a shuttle bus|班车","take the airport shuttle|乘坐机场班车","shuttle service|接送服务"],
+"fare":["the round-trip fare|往返票价","bus fare|公交车费","fare increases|票价上涨"],
+"terminal":["Terminal 2|2 号航站楼","the bus terminal|公交总站","arrive at the terminal|到达航站楼"],
+"layover":["a three-hour layover|中途停留三小时","a layover in Tokyo|在东京中转停留"],
+"passport":["a valid passport|有效护照","renew one's passport|续办护照","show your passport|出示护照"],
+"destination":["arrive at the destination|抵达目的地","a popular tourist destination|热门旅游目的地","the final destination|最终目的地"],
+"boarding":["a boarding pass|登机牌","boarding begins at eight|八点开始登机","the boarding gate|登机口"],
+"voucher":["a hotel voucher|酒店住宿券","redeem a voucher|使用代金券","a meal voucher|餐券"],
+"excursion":["a one-day excursion|一日游","go on an excursion|去短途旅行"],
+"complaint":["file a complaint|提出投诉","handle a complaint|处理投诉","a complaint about the service|对服务的投诉"],
+"inquiry":["make an inquiry|进行咨询","respond to inquiries|回复咨询","an inquiry about|关于……的询问"],
+"assistance":["offer assistance|提供帮助","need assistance|需要帮助","with the assistance of|在……的协助下"],
+"satisfaction":["customer satisfaction|客户满意度","guarantee satisfaction|保证满意","to your satisfaction|如你所愿"],
+"resolve":["resolve the issue|解决问题","resolve a dispute|解决纠纷","resolve to do|决心做"],
+"respond":["respond promptly|及时回复","respond to the request|回应请求","respond by email|通过邮件回复"],
+"courteous":["a courteous manner|礼貌的态度","be courteous to|对……有礼貌"],
+"feedback":["receive feedback|收到反馈","provide feedback on|对……提供反馈","customer feedback|客户反馈"],
+"guarantee":["a money-back guarantee|退款保证","guarantee quality|保证质量","guarantee delivery by|保证在……之前送达"],
+"courtesy":["as a courtesy|出于礼貌","courtesy of|承蒙……提供","a courtesy call|礼节性拜访"],
+"escalate":["escalate the issue|升级处理问题","escalate costs|推高成本"],
+"remedy":["seek a remedy|寻求补救","a remedy for|……的补救办法","remedy the defect|弥补缺陷"],
+"warehouse":["a distribution warehouse|配送仓库","store the goods in the warehouse|把货物存放在仓库","warehouse space|仓库空间"],
+"freight":["air freight|空运","freight charges|运费","a freight train|货运列车"],
+"packaging":["the packaging is damaged|包装破损","attractive packaging|有吸引力的包装","packaging costs|包装成本"],
+"dispatch":["dispatch the order|发出订单货物","dispatch a team|派遣团队","dispatch within 24 hours|24 小时内发货"],
+"distribution":["a distribution center|配送中心","the distribution of goods|货物的分销","distribution costs|配送成本"],
+"assembly":["an assembly line|装配线","the assembly of parts|零件的装配","a general assembly|全体会议"],
+"component":["electronic components|电子元件","a key component of|……的关键部分","replace a component|更换部件"],
+"defective":["defective merchandise|有缺陷的商品","a defective product|残次品","return defective items|退回有缺陷的货品"],
+"inspect":["inspect the goods|检查货物","carefully inspect|仔细检查","inspect for defects|检查是否有缺陷"],
+"capacity":["production capacity|产能","at full capacity|满负荷","seating capacity|座位容量"],
+"efficiency":["improve efficiency|提高效率","energy efficiency|能源效率","operate with efficiency|高效运转"],
+"facility":["a manufacturing facility|制造工厂","modern facilities|现代化的设施","recreational facilities|娱乐设施"],
+"machinery":["heavy machinery|重型机械","install new machinery|安装新机械","operate machinery|操作机械"],
+"durable":["durable materials|耐用的材料","a durable design|耐用的设计","durable goods|耐用品"],
+"specification":["meet the specifications|符合规格","technical specifications|技术规格","according to specifications|按规格"],
+"halt":["halt production|停止生产","come to a halt|停下","bring A to a halt|使 A 停下"],
+"output":["increase output|提高产量","annual output|年产量","industrial output|工业产出"],
+"procure":["procure equipment|采购设备","procure from a supplier|从供应商处采购"],
+"clause":["a contract clause|合同条款","add a clause|增加一条条款","under clause 5|根据第 5 条"],
+"liable":["be liable for damages|对损失负责","be liable to pay|有义务支付","hold sb liable|使某人承担责任"],
+"compliance":["in compliance with|符合，遵守","ensure compliance with regulations|确保符合规定","a compliance officer|合规专员"],
+"violate":["violate the contract|违反合同","violate regulations|违反规定","violate privacy|侵犯隐私"],
+"terminate":["terminate the contract|终止合同","terminate employment|解除雇佣关系","the agreement was terminated|协议被终止"],
+"amend":["amend the agreement|修订协议","amend the terms|修改条款","an amendment to the contract|合同的修正"],
+"binding":["a binding agreement|有约束力的协议","legally binding|具有法律约束力","binding on both parties|对双方都有约束力"],
+"confidential":["confidential information|机密信息","keep the report confidential|对报告保密","strictly confidential|绝密"],
+"patent":["apply for a patent|申请专利","hold a patent|持有专利","patent infringement|专利侵权"],
+"copyright":["copyright protection|版权保护","hold the copyright|拥有版权","infringe copyright|侵犯版权","copyright laws|版权法"],
+"arbitration":["submit to arbitration|提交仲裁","an arbitration clause|仲裁条款","binding arbitration|有约束力的仲裁"],
+"obligation":["meet one's obligations|履行义务","a legal obligation|法律义务","without obligation|无义务约束"],
+"software":["install the software|安装软件","a software update|软件更新","a software company|软件公司"],
+"install":["install the program|安装程序","install a new system|安装新系统","the installation takes ten minutes|安装需要十分钟"],
+"upgrade":["upgrade the system|升级系统","a free upgrade|免费升级","upgrade to the premium plan|升级到高级方案"],
+"database":["a customer database|客户数据库","access the database|访问数据库","update the database|更新数据库"],
+"device":["a mobile device|移动设备","connect the device to|把设备连接到","a portable device|便携设备"],
+"access":["have access to|可以使用","gain access to the files|获取文件访问权","restrict access|限制访问","remote access|远程访问"],
+"encrypt":["encrypt the data|加密数据","encrypted email|加密邮件"],
+"backup":["make a backup|做备份","a backup copy|备份副本","back up the files|备份文件"],
+"compatible":["compatible with|与……兼容","fully compatible|完全兼容"],
+"glitch":["a software glitch|软件小故障","fix a glitch|修复小故障"],
+"obsolete":["become obsolete|变得过时","obsolete equipment|过时的设备"],
+"implement":["implement the plan|实施计划","implement new procedures|实施新流程","fully implement|全面落实"],
+"technical":["technical support|技术支持","a technical problem|技术问题","technical expertise|专业技术"],
+"network":["the company network|公司网络","network security|网络安全","a network outage|网络中断"],
+"accomplish":["accomplish the task|完成任务","accomplish one's goal|实现目标"],
+"acquire":["acquire a company|收购一家公司","acquire skills|获得技能","acquire property|取得财产"],
+"adjust":["adjust the settings|调整设置","adjust to the change|适应变化","adjust prices|调整价格"],
+"adequate":["adequate supplies|充足的供应","adequate training|充分的培训","be adequate for|足以应付"],
+"advantage":["take advantage of|利用","a competitive advantage|竞争优势","have an advantage over|比……占优势"],
+"alternative":["an alternative to|……的替代方案","alternative energy|替代能源","have no alternative but to|别无选择只能"],
+"approximate":["an approximate cost|大约的成本","an approximate figure|大概的数字","approximately 20 percent|大约 20%"],
+"assess":["assess the damage|评估损失","assess the situation|评估形势","assess performance|评估业绩"],
+"assist":["assist sb with sth|在某事上协助某人","assist in the preparation|协助准备工作"],
+"attempt":["make an attempt to|试图","attempt to do|尝试做","a first attempt|第一次尝试"],
+"available":["available for purchase|可供购买","not available at the moment|目前无法提供","make A available to|把 A 提供给","available by phone|可通过电话联系"],
+"capable":["be capable of|有能力做","a capable manager|能干的经理"],
+"cease":["cease operations|停止运营","cease to exist|不再存在"],
+"comply":["comply with the regulations|遵守规定","comply with the request|照要求办","failure to comply|未遵守"],
+"consist":["consist of|由……组成","consist in|在于"],
+"consult":["consult with a lawyer|与律师商议","consult the manual|查阅手册","consult a doctor|看医生"],
+"contribute":["contribute to|促成；向……捐款","contribute funds|出资","make a contribution|作出贡献"],
+"convert":["convert A into B|把 A 转换成 B","convert the warehouse into offices|把仓库改建成办公室"],
+"decline":["sales declined sharply|销售急剧下降","decline an offer|谢绝报价","a decline in demand|需求下降"],
+"demonstrate":["demonstrate the product|演示产品","demonstrate that|证明","demonstrate a commitment to|表现出对……的承诺"],
+"determine":["determine the cause|确定原因","be determined by|由……决定","determine whether|判断是否"],
+"enhance":["enhance efficiency|提高效率","enhance the company's image|提升公司形象"],
+"ensure":["ensure that|确保","ensure quality|保证质量","ensure compliance|确保合规"],
+"establish":["establish a subsidiary|设立子公司","establish a relationship|建立关系","be established in 1990|成立于 1990 年"],
+"exceed":["exceed the budget|超出预算","exceed expectations|超出预期","not exceed 10 percent|不超过 10%"],
+"facilitate":["facilitate communication|促进沟通","facilitate the process|使流程更顺畅"],
+"frequent":["frequent flyer|常旅客","frequent visits|频繁的拜访","frequent delays|经常延误"],
+"maintain":["maintain quality|保持质量","maintain equipment|保养设备","maintain a record of|留存……的记录"],
+"provide":["provide sb with sth|向某人提供某物","provide support|提供支持","provided that|条件是"],
+"reduce":["reduce costs|降低成本","reduce staff|裁减员工","a reduction of 10 percent|减少 10%"],
+"sufficient":["sufficient evidence|充分的证据","sufficient time|足够的时间","be sufficient for|对……足够"],
+"accommodate":["accommodate up to 200 guests|最多可容纳 200 位客人","accommodate the request|满足这个请求","accommodate changes|适应变化"],
+"acknowledge":["acknowledge receipt of|确认收到","acknowledge the problem|承认问题","be widely acknowledged|被广泛认可"],
+"allowance":["a travel allowance|差旅津贴","a monthly allowance|每月津贴","a clothing allowance|服装补贴"],
+"anticipate":["anticipate a delay|预料会有延误","anticipate demand|预测需求","as anticipated|正如预期"],
+"appliance":["household appliances|家用电器","a kitchen appliance|厨房电器","repair appliances|维修电器"],
+"applicable":["applicable laws|适用法律","where applicable|在适用的情况下","not applicable|不适用"],
+"appoint":["appoint sb as manager|任命某人为经理","appoint a committee|任命一个委员会","at the appointed time|在约定时间"],
+"assign":["assign tasks|分配任务","assign sb to|把某人派往","assign a number to|给……分配编号"],
+"authorize":["authorize the payment|批准付款","be authorized to do|被授权做","an authorized dealer|授权经销商"],
+"beverage":["complimentary beverages|免费饮料","a cold beverage|冷饮","beverage service|饮料服务"],
+"bid":["submit a bid|提交投标","the lowest bid|最低出价","bid for the contract|竞标这份合同"],
+"brochure":["a travel brochure|旅游宣传册","request a brochure|索取宣传册","a promotional brochure|推广手册"],
+"certificate":["a gift certificate|礼券","a birth certificate|出生证明","issue a certificate|颁发证书"],
+"commission":["earn a commission|赚取佣金","a sales commission|销售佣金","a planning commission|规划委员会"],
+"commute":["commute to work|通勤上班","a daily commute|每日通勤","commute by subway|乘地铁通勤"],
+"complimentary":["a complimentary breakfast|免费早餐","complimentary Wi-Fi|免费无线网络","complimentary tickets|赠票"],
+"comprehensive":["a comprehensive report|全面的报告","comprehensive coverage|全面的保障","a comprehensive review|全面审查"],
+"consecutive":["three consecutive years|连续三年","on consecutive days|连续几天"],
+"consultant":["hire a consultant|聘请顾问","a management consultant|管理顾问"],
+"corporate":["corporate headquarters|公司总部","corporate culture|企业文化","a corporate client|企业客户"],
+"correspondence":["business correspondence|商务信函","keep up a correspondence with|与……保持通信","address all correspondence to|所有信件寄至"],
+"deficit":["a budget deficit|预算赤字","reduce the deficit|减少赤字","a trade deficit|贸易逆差"],
+"designate":["designate a smoking area|指定吸烟区","designate sb as|指定某人为","a designated driver|指定司机"],
+"draft":["a rough draft|初稿","draft a contract|起草合同","the final draft|最终稿"],
+"eligible":["be eligible for|有资格获得","eligible employees|符合条件的员工"],
+"enroll":["enroll in the course|报名参加课程","enroll new members|招收新会员"],
+"enterprise":["a small enterprise|小企业","a state-owned enterprise|国有企业","a private enterprise|私营企业"],
+"exhibit":["exhibit the products|展出产品","a trade exhibit|贸易展览","on exhibit|在展出中"],
+"expand":["expand the business|扩展业务","expand into Asia|扩张到亚洲","an expansion plan|扩张计划"],
+"expire":["the contract expires|合同到期","expire at the end of the month|月底到期","an expired passport|过期的护照"],
+"forecast":["a sales forecast|销售预测","forecast rain|预报有雨","a weather forecast|天气预报"],
+"fulfill":["fulfill an order|完成订单","fulfill the requirements|满足要求","fulfill one's obligations|履行义务"],
+"headquarters":["corporate headquarters|公司总部","move the headquarters to|把总部迁到"],
+"hire":["hire new employees|雇用新员工","hire a car|租车","a new hire|新员工"],
+"insurance":["medical insurance|医疗保险","take out insurance|投保","an insurance policy|保险单"],
+"lease":["sign a two-year lease|签两年租约","lease the office space|租赁办公空间","renew the lease|续租"],
+"merger":["a merger between A and B|A 与 B 的合并","approve the merger|批准合并","the merger was completed|合并完成"],
+"mortgage":["pay off the mortgage|还清贷款","apply for a mortgage|申请抵押贷款","monthly mortgage payments|每月房贷"],
+"notify":["notify sb of sth|通知某人某事","notify all employees|通知全体员工","notify in writing|以书面形式通知"],
+"oversee":["oversee the project|监管该项目","oversee daily operations|监管日常运营"],
+"penalty":["pay a penalty|支付罚款","a penalty for late payment|滞纳金","impose a penalty|处以罚款"],
+"policy":["company policy|公司政策","an insurance policy|保险单","a return policy|退货政策"],
+"premium":["pay the premium|支付保险费","premium quality|优质品质","at a premium|溢价；稀缺"],
+"quota":["meet the quota|完成指标","a sales quota|销售配额","an import quota|进口配额"],
+"relocate":["relocate to another city|迁往另一座城市","relocate the office|搬迁办公室"],
+"rental":["a car rental|汽车租赁","rental fees|租金","a rental agreement|租赁协议"],
+"reputation":["build a reputation|建立声誉","have a reputation for|以……著称","damage one's reputation|损害声誉"],
+"seminar":["attend a seminar|参加研讨会","hold a seminar|举办研讨会","a training seminar|培训研讨会"],
+"subsidiary":["a wholly owned subsidiary|全资子公司","a subsidiary of|……的子公司"],
+"turnover":["annual turnover|年营业额","high staff turnover|员工流动率高","a turnover of five million|五百万的营业额"],
+"venue":["choose a venue|选择场地","the venue for the conference|会议场地","change the venue|更换场地"],
+"workshop":["a training workshop|培训研讨班","attend a workshop|参加工作坊","a repair workshop|修理车间"],
+"affordable":["affordable housing|负担得起的住房","affordable prices|实惠的价格"],
+"ambiguous":["an ambiguous answer|含糊的回答","deliberately ambiguous|故意含糊"],
+"arrange":["arrange a meeting|安排会议","arrange for sb to do|安排某人做","arrange the files|整理文件"],
+"attendance":["attendance is mandatory|必须出席","take attendance|点名","attendance figures|出席人数"],
+"cite":["cite an example|举例","cite a source|援引来源","cite statistics|引用统计数据"],
+"considerable":["a considerable amount of|相当多的","considerable progress|相当大的进步","at considerable cost|以相当大的代价"],
+"convenient":["at your earliest convenience|尽早","a convenient location|便利的位置","convenient for|对……方便"],
+"criteria":["meet the criteria|符合标准","selection criteria|遴选标准"],
+"diverse":["a diverse workforce|多元化的员工队伍","diverse backgrounds|不同的背景","a diverse range of|各种各样的"],
+"domestic":["domestic flights|国内航班","the domestic market|国内市场","domestic appliances|家用电器"],
+"eliminate":["eliminate the risk|消除风险","eliminate waste|杜绝浪费","be eliminated from|从……中被淘汰"],
+"essential":["it is essential that|必须","essential equipment|必备设备","be essential to|对……至关重要"],
+"exclusive":["an exclusive offer|独家优惠","exclusive rights|专有权","exclusive of tax|不含税"],
+"flexible":["flexible working hours|弹性工作时间","a flexible schedule|灵活的安排","remain flexible|保持灵活"],
+"fluctuate":["prices fluctuate|价格波动","fluctuate between A and B|在 A 与 B 之间波动","fluctuating demand|波动的需求"],
+"generous":["a generous discount|很大的折扣","a generous offer|优厚的条件","be generous with|在……上大方"],
+"gradually":["gradually increase|逐渐增加","gradually improve|逐步改善"],
+"indicate":["indicate that|表明","as indicated above|如上所示","indicate a preference for|显示出对……的偏好"],
+"inevitable":["it is inevitable that|不可避免","the inevitable result|必然的结果"],
+"ingredient":["the key ingredients|主要成分","natural ingredients|天然成分","an essential ingredient for success|成功的关键要素"],
+"innovative":["an innovative approach|创新的方法","innovative technology|创新技术","an innovative product|创新产品"],
+"intend":["intend to do|打算做","be intended for|专为……而设","as intended|按预期"],
+"invest":["invest in|投资于","invest heavily in research|在研发上大举投资","a return on investment|投资回报"],
+"justify":["justify the cost|证明这笔开支合理","justify a decision|为决定辩护","there is no justification for|没有理由"],
+"mandatory":["mandatory training|强制培训","it is mandatory to|必须","a mandatory retirement age|强制退休年龄"],
+"minimum":["the minimum wage|最低工资","a minimum of five years|至少五年","keep costs to a minimum|把成本降到最低"],
+"modify":["modify the design|修改设计","modify the terms|修改条款","slightly modified|稍作修改"],
+"numerous":["numerous studies|大量研究","on numerous occasions|在许多场合","numerous complaints|许多投诉"],
+"obtain":["obtain permission|获得许可","obtain a license|取得执照","obtain information|获取信息"],
+"opportunity":["take the opportunity to|借机","an equal opportunity employer|机会均等的雇主","a good opportunity for|对……是个好机会"],
+"overall":["the overall cost|总成本","overall performance|整体表现","an overall increase|整体增长"],
+"persuade":["persuade sb to do|说服某人做","be persuaded that|被说服认为"],
+"potential":["potential customers|潜在客户","reach one's potential|发挥潜力","the potential for growth|增长潜力"],
+"precise":["precise figures|精确的数字","to be precise|确切地说","at the precise moment|就在那一刻"],
+"priority":["a top priority|首要任务","give priority to|优先考虑","set priorities|确定优先顺序"],
+"previous":["the previous year|前一年","previous experience|以往的经验","as previously mentioned|如前所述"],
+"proceed":["proceed with the plan|继续推进计划","proceed to the next step|进入下一步","proceed as planned|按计划进行"],
+"prohibit":["prohibit smoking|禁止吸烟","be prohibited from doing|被禁止做","strictly prohibited|严禁"],
+"prompt":["a prompt reply|迅速的回复","prompt action|迅速的行动","prompt sb to do|促使某人做"],
+"reliable":["a reliable source|可靠的消息来源","reliable service|可靠的服务","highly reliable|非常可靠"],
+"relevant":["relevant documents|相关文件","relevant to|与……有关","relevant experience|相关经验"],
+"remarkable":["a remarkable achievement|非凡的成就","a remarkable increase in|……的显著增长","remarkably well|非常好"],
+"restrict":["restrict access to|限制进入","restrict the use of|限制使用","a restricted area|限制区域"],
+"retain":["retain staff|留住员工","retain control of|保留对……的控制权","retain a copy|保留一份副本"],
+"shortage":["a shortage of|缺少","a labor shortage|劳动力短缺","face a shortage of funds|面临资金短缺"],
+"significant":["a significant increase|显著增长","significant progress|重大进展","statistically significant|统计上显著的"],
+"submit":["submit a report|提交报告","submit an application|提交申请","submit to the committee|提交给委员会"],
+"subsequent":["subsequent to|在……之后","subsequent events|随后的事件","in subsequent years|在随后的几年里"],
+"temporary":["a temporary position|临时职位","temporary measures|临时措施","on a temporary basis|暂时地"],
+"thorough":["a thorough investigation|彻底的调查","a thorough review|全面审查","a thorough understanding of|对……的透彻理解"],
+"urgent":["an urgent matter|紧急事务","in urgent need of|急需","mark the message urgent|把消息标为紧急"],
+"valid":["a valid passport|有效护照","valid for one year|有效期一年","a valid argument|有说服力的论点"],
+"verify":["verify the information|核实信息","verify the figures|核对数字","please verify your email address|请验证你的邮箱地址"],
+"willing":["be willing to do|愿意做","a willing participant|自愿的参与者"]
+};
+
 /* ---------- 状态 ---------- */
 function load(){
   let s = null;
   try{ s = JSON.parse(localStorage.getItem(KEY) || 'null'); }catch(e){ s = null; }
   if(!s || typeof s !== 'object') s = {};
   s.version = 1;
-  s.settings = Object.assign({dailyNew:20, accent:'en-US', autoSpeak:true, mode:'mix', theme:'light', showMn:true}, s.settings || {});
+  s.settings = Object.assign({dailyNew:20, accent:'en-US', autoSpeak:true, mode:'mix', theme:'light', showMn:true, showColl:true}, s.settings || {});
   s.words = s.words || {};
   s.log = s.log || {};
   s.custom = Array.isArray(s.custom) ? s.custom : [];
@@ -2165,12 +2523,12 @@ function rebuildAll(){
   const seen = {};
   BANK.forEach(function(x){
     seen[x.w] = 1;
-    base.push({w:x.w, ph:x.ph, mean:x.mean, ex:x.ex, exZh:x.exZh, cat:x.cat, mn: MNEM[x.w] || '', sn: SENSE[x.w] || null, qt: QUOTE[x.w] || null});
+    base.push({w:x.w, ph:x.ph, mean:x.mean, ex:x.ex, exZh:x.exZh, cat:x.cat, mn: MNEM[x.w] || '', sn: SENSE[x.w] || null, qt: QUOTE[x.w] || null, cl: COLL[x.w] || null});
   });
   state.custom.forEach(function(x){
     if(!x || !x.w || seen[x.w]) return;
     seen[x.w] = 1;
-    base.push({w:x.w, ph:x.ph||'', mean:x.mean||'', ex:x.ex||'', exZh:x.exZh||'', cat:x.cat||'自定义', mn:x.mn || MNEM[x.w] || '', sn: x.sn || SENSE[x.w] || null, qt: QUOTE[x.w] || null});
+    base.push({w:x.w, ph:x.ph||'', mean:x.mean||'', ex:x.ex||'', exZh:x.exZh||'', cat:x.cat||'自定义', mn:x.mn || MNEM[x.w] || '', sn: x.sn || SENSE[x.w] || null, qt: QUOTE[x.w] || null, cl: x.cl || COLL[x.w] || null});
   });
   ALL = base;
   for(const k in IDX) delete IDX[k];
@@ -2192,15 +2550,16 @@ function wdHit(w){
   if(IDX[w] !== undefined) return true;
   return !!GLOSS[w];
 }
-function markWords(sen){
+function markWords(sen, minLen){
   if(!sen) return '';
+  const need = minLen || 1;
   const re = /[A-Za-z][A-Za-z'’-]*/g;
   let out = '', last = 0, m;
   while((m = re.exec(sen)) !== null){
     out += esc(sen.slice(last, m.index));
     const tok = m[0];
     const key = tok.toLowerCase().replace(/[’']s$/, '').replace(/[’']$/, '').replace(/^-+|-+$/g, '');
-    out += wdHit(key)
+    out += (key.length >= need && wdHit(key))
       ? '<span class="wd" data-w="' + esc(key) + '">' + esc(tok) + '</span>'
       : esc(tok);
     last = m.index + tok.length;
@@ -2276,6 +2635,20 @@ function quoteHtml(it){
     '<p class="q-en">“' + markWords(it.qt[0]) + '”</p>' +
     '<p class="q-zh">' + esc(it.qt[1]) + '</p>' +
     '<p class="q-src">— ' + esc(it.qt[2]) + '</p>' +
+  '</div>';
+}
+/* 固定搭配 */
+function collHtml(it, cls){
+  if(!it || !it.cl || !it.cl.length || state.settings.showColl === false) return '';
+  let li = '';
+  it.cl.forEach(function(pair){
+    const p = String(pair).split('|');
+    li += '<li><span class="c-en">' + markWords(p[0], 3) + '</span>' +
+          (p[1] ? '<span class="c-zh">' + esc(p[1]) + '</span>' : '') + '</li>';
+  });
+  return '<div class="coll' + (cls ? ' ' + cls : '') + '">' +
+    '<div class="coll-h"><span class="coll-tag">搭配</span></div>' +
+    '<ul class="coll-list">' + li + '</ul>' +
   '</div>';
 }
 function todayKey(d){  const t = new Date((d || new Date()).getTime() - (d || new Date()).getTimezoneOffset()*60000);
@@ -2558,6 +2931,7 @@ function renderCard(){
         '</div>' +
         '<div class="fc-back">' +
           senseHtml(it) +
+          collHtml(it) +
           quoteHtml(it) +
           mnHtml(it) +
         '</div>' +
@@ -2719,6 +3093,7 @@ function renderReviewCard(){
       '</div>' +
       '<div class="fc-back">' +
         senseHtml(it) +
+        collHtml(it) +
         quoteHtml(it) +
         mnHtml(it) +
       '</div>' +
@@ -2756,6 +3131,7 @@ function showFb(ok, item){
     '<div class="fb-h">' + (ok ? '回答正确' : '正确答案') + '</div>' +
     '<div class="fb-word"><b>' + esc(item.w) + '</b> <span class="zh">' + esc(item.ph) + '</span></div>' +
     senseHtml(item) +
+    collHtml(item) +
     quoteHtml(item) +
     mnHtml(item) +
     '<div class="fb-actions"><button class="btn primary sm" id="btnNext">继续</button></div>';
@@ -2925,6 +3301,7 @@ function renderWordsList(){
         '<div class="muted" style="margin-bottom:4px">' + esc(x.ph) + ' · ' + esc(x.cat) +
           ' <button class="link" data-speak="' + esc(x.w) + '">朗读</button></div>' +
         senseHtml(x) +
+        collHtml(x) +
         quoteHtml(x) +
         mnHtml(x) +
       '</div>';
@@ -3021,6 +3398,7 @@ function syncSettings(){
   $('#setAccent').value = state.settings.accent;
   $('#setAuto').checked = !!state.settings.autoSpeak;
   $('#setMn').checked = state.settings.showMn !== false;
+  $('#setColl').checked = state.settings.showColl !== false;
   $('#setTheme').value = state.settings.theme;
   $('#bankCount').textContent = ALL.length;
 }
@@ -3037,6 +3415,11 @@ function bindSettings(){
     state.settings.showMn = this.checked;
     save();
     toast(this.checked ? '已开启助记' : '已关闭助记');
+  });
+  $('#setColl').addEventListener('change', function(){
+    state.settings.showColl = this.checked;
+    save();
+    toast(this.checked ? '已开启固定搭配' : '已关闭固定搭配');
   });
   $('#setTheme').addEventListener('change', function(){ state.settings.theme = this.value; applyTheme(); save(); });
   $('#btnTestSpeak').onclick = function(){ speak('specimen'); };
